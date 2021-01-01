@@ -144,7 +144,7 @@ var formatLargeNumber = x => {
 };
 var pullJSON = filename => {
   let request = new XMLHttpRequest();
-  let url = "/json/" + filename + ".json?v=" + VERSION;
+  let url = "/json/" + filename + ".json";
   // Set up the request
   console.log("Loading JSON from " + url);
   request.responseType = 'json';
@@ -787,7 +787,7 @@ global.time = 0;
 
 // Window setup <3
 global.mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
-var serverName = 'Kotarras-2-template';
+var serverName = 'Connected';
 window.onload = () => {
   // Server name stuff
   document.getElementById('serverName').innerHTML = '<h4 class="nopadding">' + serverName + '</h4>';
@@ -1792,7 +1792,7 @@ const socketInit = (() => {
   // The initialization function (this is returned)
   return port => {
     console.log("trying to connect to server")
-    let socket = new WebSocket('wss://' + window.location.hostname + ':' + port);
+    let socket = new WebSocket('wss://' + window.location.hostname);
     console.log("Socket opened")
     // Set up our socket
     socket.binaryType = 'arraybuffer';
