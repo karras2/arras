@@ -3308,13 +3308,13 @@ const gameDrawDead = (() => {
   let getDeath = () => {
     let txt = '';
     if (global.finalKillers.length) {
-      txt = '🔪 oh no! he died to';
+      txt = '🔪 Killed by';
       global.finalKillers.forEach(e => {
         txt += ' ' + addArticle(mockups[e].name) + ' and';
       });
       txt = txt.slice(0, -4) + '.';
     } else {
-      txt += 'oh no! he died to his own stupidity';
+      txt += 'Died to nothing.';
     }
     return txt;
   };
