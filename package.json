@@ -1,27 +1,19 @@
 {
-  "//1": "describes your app and its dependencies",
-  "//2": "https://docs.npmjs.com/files/package.json",
-  "//3": "updating this file will download and update your packages",
-  "name": "arrasio",
-  "version": "0.0.1",
-  "description": "A full version of arras.io, with a client and server",
+  "name": "arras",
+  "version": "1.0.0",
   "main": "server/server.js",
   "scripts": {
-    "start": "node server/server.js"
+    "start": "node server/server"
   },
   "dependencies": {
-    "express": "^4.17.1"
+    "eris": "^0.9.0",
+    "google-closure-library": "^20201102.0.1",
+    "node-fetch": "^2.6.1",
+    "ws": "^6.1.4",
+    "express": "latest"
   },
   "engines": {
-    "node": "12.x"
+    "node": "10.x"
   },
-  "repository": {
-    "url": "https://glitch.com/edit/#!/hello-express"
-  },
-  "license": "MIT",
-  "keywords": [
-    "node",
-    "glitch",
-    "express"
-  ]
+  "license": "GPL-3.0"
 }

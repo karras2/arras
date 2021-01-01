@@ -3302,7 +3302,7 @@ const gameDrawDead = (() => {
         ((finalKills[1]) ? finalKills[1] + ' assists' : '') +
         (((finalKills[0] || finalKills[1]) && finalKills[2]) ? ' and ' : '') +
         ((finalKills[2]) ? finalKills[2] + ' visitors defeated' : '') :
-        ' play 2hu m8, you are bound to be killed by gengetsu') +
+        ' A true pacifist.') +
       '.';
   };
   let getDeath = () => {
@@ -3314,7 +3314,7 @@ const gameDrawDead = (() => {
       });
       txt = txt.slice(0, -4) + '.';
     } else {
-      txt += 'Died to nothing.';
+      txt += 'Died to server code.';
     }
     return txt;
   };
