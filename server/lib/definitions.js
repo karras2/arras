@@ -36,7 +36,6 @@ const skillSet = (() => {
     str: 2,
     dam: 3,
     spd: 4,
-
     shi: 5,
     atk: 6,
     hlt: 7,

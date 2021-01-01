@@ -4,13 +4,8 @@
 "use strict";
 
 // Fundamental requires <3
-//var global = require('./lib/global');
-//var util = require('./lib/util');
-
-//imported manualy cause stuffs going wrong
-
 var global = {
-  // Keys and other mathematical constants and some other shit
+  // Keys and other mathematical constants
   KEY_ESC: 27,
   KEY_ENTER: 13,
   KEY_CHAT: 13,
@@ -50,7 +45,6 @@ var global = {
   KEY_CHOOSE_8: 76,
   KEY_LEVEL_UP: 78,
   KEY_FUCK_YOU: 192,
-  KEY_TP: 71,
 
   // Canvas
   screenWidth: window.innerWidth,
@@ -69,18 +63,18 @@ var global = {
   backgroundColor: '#f2fbff',
   lineColor: '#000000',
 };
-
-var submitToLocalStorage = name => {
+var util = {};
+util.submitToLocalStorage = name => {
   localStorage.setItem(name + 'Value', document.getElementById(name).value);
   localStorage.setItem(name + 'Checked', document.getElementById(name).checked);
   return false;
 };
-var retrieveFromLocalStorage = name => {
+util.retrieveFromLocalStorage = name => {
   document.getElementById(name).value = localStorage.getItem(name + 'Value');
   document.getElementById(name).checked = localStorage.getItem(name + 'Checked') === 'true';
   return false;
 };
-var handleLargeNumber = (a, cullZeroes = false) => {
+util.handleLargeNumber = (a, cullZeroes = false) => {
   if (cullZeroes && a == 0) {
     return '';
   }
@@ -108,7 +102,7 @@ var handleLargeNumber = (a, cullZeroes = false) => {
   return (a / Math.pow(10, 15)).toFixed(2) + "q";
 
 };
-var timeForHumans = x => {
+util.timeForHumans = x => {
   // ought to be in seconds
   let seconds = x % 60;
   x /= 60;
@@ -136,13 +130,13 @@ var timeForHumans = x => {
   }
   return y;
 };
-var addArticle = string => {
+util.addArticle = string => {
   return (/[aeiouAEIOU]/.test(string[0])) ? 'an ' + string : 'a ' + string;
 };
-var formatLargeNumber = x => {
+util.formatLargeNumber = x => {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
-var pullJSON = filename => {
+util.pullJSON = filename => {
   let request = new XMLHttpRequest();
   let url = "/json/" + filename + ".json";
   // Set up the request
@@ -164,7 +158,7 @@ var pullJSON = filename => {
   });
 };
 
-//Get color
+// Get color
 var config = {
   graphical: {
     screenshotMode: false,
@@ -188,7 +182,7 @@ var config = {
   },
 };
 var color = {};
-pullJSON('color').then(data => color = data);
+util.pullJSON('color').then(data => color = data);
 
 // Color functions
 let mixColors = (() => {
@@ -260,26 +254,6 @@ function getColor(colorNumber) {
       return color.white;
     case 19:
       return color.guiblack;
-    case 21:
-      return '#1058D3';
-    case 22:
-      return '#8534E2';
-    case 23:
-      return '#FF1493';
-    case 24:
-      return '#FF4500';
-    case 25:
-      return '#EFC74B';
-    case 26:
-      return '#B9E87E';
-    case 27:
-      return '#EFC74B';
-    case 28:
-      return '#A00A00';
-    case 29:
-      return '#E7896D';
-    case 30:
-      return '#8D6ADF';
 
     default:
       return '#FF0000';
@@ -302,12 +276,7 @@ function getZoneColor(cell, real) {
       return color.red;
     case 'bas4':
       return color.pink;
-    case 'bas5':
-      return color.gold;
-    case 'bas6':
-      return color.orange;
-    case 'nest':
-      return (real) ? color.purple : color.lavender;
+      //case 'nest': return (real) ? color.purple : color.lavender;     
     default:
       return (real) ? color.white : color.lgrey;
   }
@@ -325,7 +294,7 @@ function setColor(context, givenColor) {
 
 // Get mockups <3
 var mockups = [];
-pullJSON('mockups').then(data => mockups = data);
+util.pullJSON('mockups').then(data => mockups = data);
 // Mockup functions
 function getEntityImageFromMockup(index, color = mockups[index].color) {
   let mockup = mockups[index];
@@ -787,19 +756,27 @@ global.time = 0;
 
 // Window setup <3
 global.mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
-var serverName = 'Connected';
+var serverName = 'Unknown Server';
 window.onload = () => {
   // Server name stuff
+  switch (window.location.hostname) {
+    case '139.162.69.30':
+      serverName = '🇯🇵 arras-linode-tokyo';
+      break;
+    case '172.104.9.164':
+      serverName = '🇺🇸 arras-linode-newark';
+      break;
+  }
   document.getElementById('serverName').innerHTML = '<h4 class="nopadding">' + serverName + '</h4>';
   // Save forms
-  retrieveFromLocalStorage('playerNameInput');
-  retrieveFromLocalStorage('playerKeyInput');
-  retrieveFromLocalStorage('optScreenshotMode');
-  retrieveFromLocalStorage('optPredictive');
-  retrieveFromLocalStorage('optFancy');
-  retrieveFromLocalStorage('optColors');
-  retrieveFromLocalStorage('optNoPointy');
-  retrieveFromLocalStorage('optBorders');
+  util.retrieveFromLocalStorage('playerNameInput');
+  util.retrieveFromLocalStorage('playerKeyInput');
+  util.retrieveFromLocalStorage('optScreenshotMode');
+  util.retrieveFromLocalStorage('optPredictive');
+  util.retrieveFromLocalStorage('optFancy');
+  util.retrieveFromLocalStorage('optColors');
+  util.retrieveFromLocalStorage('optNoPointy');
+  util.retrieveFromLocalStorage('optBorders');
   // Set default theme
   if (document.getElementById('optColors').value === '') {
     document.getElementById('optColors').value = 'normal';
@@ -823,7 +800,7 @@ window.onload = () => {
 };
 
 // Prepare canvas stuff
-var Canvas = class Canvas {
+class Canvas {
   constructor(params) {
     this.directionLock = false;
     this.target = global.target;
@@ -881,12 +858,6 @@ var Canvas = class Canvas {
       case global.KEY_FUCK_YOU:
         this.parent.socket.talk('0');
         break;
-      case global.KEY_TP:
-        this.parent.socket.talk('K');
-        break;
-      case global.KEY_FIREFOOD:
-        this.parent.socket.talk('P');
-        break
     }
     if (!event.repeat) {
       switch (event.keyCode) {
@@ -1170,7 +1141,23 @@ var moveCompensation = (() => {
 const socketInit = (() => {
   // Inital setup stuff
   window.WebSocket = window.WebSocket || window.MozWebSocket;
-  var encode = (() => {
+  const protocol = {};
+
+  function checkEndian() {
+    var arrayBuffer = new ArrayBuffer(2);
+    var uint8Array = new Uint8Array(arrayBuffer);
+    var uint16array = new Uint16Array(arrayBuffer);
+    uint8Array[0] = 0xAA; // set first byte
+    uint8Array[1] = 0xBB; // set second byte
+    if (uint16array[0] === 0xBBAA) return 0;
+    if (uint16array[0] === 0xAABB) return 1;
+    else throw new Error("Something crazy just happened");
+  }
+
+  /*var isBigEndian = new Uint8Array(new Uint32Array([0x12345678]).buffer)[0] === 0x12;
+  var isLittleEndian = new Uint8Array(new Uint32Array([0x12345678]).buffer)[0] === 0x78;*/
+
+  protocol.encode = (() => {
     // unsigned 8-bit integer
     var arrUint8 = new Uint8Array(1);
     // unsigned 16-bit integer
@@ -1224,7 +1211,7 @@ const socketInit = (() => {
           throw new Error('Unknown encoding type.');
       }
     };
-    var findType = value => {
+    var findType = (value) => {
       if (typeof value === 'string') {
         for (var i = 0; i < value.length; i++) {
           if (value.charCodeAt(i) > 255) return 'String16';
@@ -1233,7 +1220,6 @@ const socketInit = (() => {
       }
       if (typeof value === 'boolean') return 'Uint8';
       if (typeof value !== 'number') {
-        console.log(value);
         throw new Error('Unencodable data type');
       }
       if (value != Math.round(value)) return 'Float32';
@@ -1270,7 +1256,7 @@ const socketInit = (() => {
     };
   })();
 
-  var decode = (() => {
+  protocol.decode = (() => {
     // unsigned 8-bit integer (none needed)
     // unsigned 16-bit integer
     var arrUint16 = new Uint16Array(1);
@@ -1541,7 +1527,6 @@ const socketInit = (() => {
                 }
               }
               z.drawsHealth = !!(type & 0x02); // force to boolean
-              z.alpha = get.next() / 255;
               // Nameplates
               if (type & 0x04) { // has a nameplate
                 z.name = get.next();
@@ -1791,9 +1776,7 @@ const socketInit = (() => {
   })();
   // The initialization function (this is returned)
   return port => {
-    console.log("trying to connect to server")
     let socket = new WebSocket('wss://' + window.location.hostname);
-    console.log("Socket opened")
     // Set up our socket
     socket.binaryType = 'arraybuffer';
     socket.open = false;
@@ -1845,7 +1828,7 @@ const socketInit = (() => {
     socket.talk = (...message) => {
       // Make sure the socket is open before we do anything
       if (!socket.open) return 1;
-      socket.send(encode(message));
+      socket.send(protocol.encode(message));
     };
     // Websocket functions for when stuff happens
     // This is for when the socket first opens
@@ -1858,7 +1841,6 @@ const socketInit = (() => {
       socket.ping = (payload) => {
         socket.talk('p', payload);
       };
-      console.log(socket.ping, global.socket, global.socket.ping)
       socket.commandCycle = setInterval(() => {
         if (socket.cmd.check()) socket.cmd.talk();
       });
@@ -1866,7 +1848,7 @@ const socketInit = (() => {
     // Handle incoming messages
     socket.onmessage = function socketMessage(message) {
       // Make sure it looks legit.
-      let m = decode(message.data);
+      let m = protocol.decode(message.data);
       if (m === -1) {
         throw new Error('Malformed packet.');
       }
@@ -1914,7 +1896,7 @@ const socketInit = (() => {
           setTimeout(() => {
             socket.talk('S', getNow());
           }, 10);
-          global.message = "Tip: Beware of safety. - " + sync.length + "/10...";
+          global.message = "Syncing clocks, please do not tab away. " + sync.length + "/10...";
         } else {
           // Calculate the clock error
           sync.sort((e, f) => {
@@ -2066,7 +2048,6 @@ const socketInit = (() => {
     // Notify about errors
     socket.onerror = function socketError(error) {
       console.log('WebSocket error: ' + error);
-      var weberror = error
       global.message = 'Socket error. Maybe another server will work.';
     };
     // Gift it to the rest of the world
@@ -2076,17 +2057,16 @@ const socketInit = (() => {
 
 // This starts the game and sets up the websocket
 function startGame() {
-  console.log("trying to start game")
   // Get options
-  submitToLocalStorage('optScreenshotMode');
+  util.submitToLocalStorage('optScreenshotMode');
   config.graphical.screenshotMode = document.getElementById('optScreenshotMode').checked;
-  submitToLocalStorage('optFancy');
+  util.submitToLocalStorage('optFancy');
   config.graphical.pointy = !document.getElementById('optNoPointy').checked;
-  submitToLocalStorage('optNoPointy');
+  util.submitToLocalStorage('optNoPointy');
   config.graphical.fancyAnimations = !document.getElementById('optFancy').checked;
-  submitToLocalStorage('optPredictive');
+  util.submitToLocalStorage('optPredictive');
   config.lag.unresponsive = document.getElementById('optPredictive').checked;
-  submitToLocalStorage('optBorders');
+  util.submitToLocalStorage('optBorders');
   switch (document.getElementById('optBorders').value) {
     case 'normal':
       config.graphical.darkBorders = config.graphical.neon = false;
@@ -2103,30 +2083,26 @@ function startGame() {
       config.graphical.darkBorders = config.graphical.neon = true;
       break;
   }
-  submitToLocalStorage('optColors');
+  util.submitToLocalStorage('optColors');
   let a = document.getElementById('optColors').value;
   color = color[(a === '') ? 'normal' : a];
   // Other more important stuff
   let playerNameInput = document.getElementById('playerNameInput');
   let playerKeyInput = document.getElementById('playerKeyInput');
   // Name and keys
-  submitToLocalStorage('playerNameInput');
-  submitToLocalStorage('playerKeyInput');
+  util.submitToLocalStorage('playerNameInput');
+  util.submitToLocalStorage('playerKeyInput');
   global.playerName = player.name = playerNameInput.value;
   global.playerKey = playerKeyInput.value.replace(/(<([^>]+)>)/ig, '').substring(0, 64);
-  console.log("Loaded info from local stroage")
   // Change the screen
   global.screenWidth = window.innerWidth;
   global.screenHeight = window.innerHeight;
   document.getElementById('startMenuWrapper').style.maxHeight = '0px';
   document.getElementById('gameAreaWrapper').style.opacity = 1;
-  console.log("Changed the screen")
   // Set up the socket
   if (!global.socket) {
-    global.socket = socketInit('');
+    global.socket = socketInit(3000);
   }
-  console.log("tried opening a socket.....")
-  console.log(global.socket)
   if (!global.animLoopHandle) {
     animloop();
   }
@@ -2154,7 +2130,7 @@ const measureText = (() => {
   return (text, fontSize, twod = false) => {
     fontSize += config.graphical.fontSizeBoost;
     var w, h;
-    div.style.font = 'bold ' + fontSize + 'px Segoe UI';
+    div.style.font = 'bold ' + fontSize + 'px Ubuntu';
     div.style.padding = '0';
     div.style.margin = '0';
     div.style.position = 'absolute';
@@ -2280,7 +2256,7 @@ const TextObj = (() => {
           yy = tctx.canvas.height / 2;
           // Draw it
           tctx.lineWidth = offset;
-          tctx.font = 'bold ' + size + 'px Segoe UI';
+          tctx.font = 'bold ' + size + 'px Ubuntu';
           tctx.textAlign = align;
           tctx.textBaseline = 'middle';
           tctx.strokeStyle = color.black;
@@ -2361,24 +2337,6 @@ const drawEntity = (() => {
         };
         context.quadraticCurveTo(c.x, c.y, p.x, p.y);
       }
-    } else if (sides > 1769) { // Star
-      if (config.graphical.pointy) context.lineJoin = 'miter';
-      let dip = 1;
-      sides = 1769;
-      context.moveTo(centerX + radius * Math.cos(angle), centerY + radius * Math.sin(angle));
-      for (let i = 0; i < 4; i++) {
-        var theta = (i + 1) / 3 * 2 * Math.PI;
-        var htheta = (i + 0.5) / 4 * 2 * Math.PI;
-        var c = {
-          x: centerX + radius * dip * Math.cos(htheta + angle),
-          y: centerY + radius * dip * Math.sin(htheta + angle),
-        };
-        var p = {
-          x: centerX + radius * Math.cos(theta + angle),
-          y: centerY + radius * Math.sin(theta + angle),
-        };
-        context.quadraticCurveTo(c.x, c.y, p.x, p.y);
-      }
     } else if (sides > 0) { // Polygon
       for (let i = 0; i < sides; i++) {
         let theta = (i / sides) * 2 * Math.PI;
@@ -2417,17 +2375,16 @@ const drawEntity = (() => {
     context.fill();
   }
   // The big drawing function
-  return (x, y, instance, ratio, alpha = 1, scale = 1, rot = 0, turretsObeyRot = false, assignedContext = false, turretInfo = false, render = instance.render) => {
-    let context = assignedContext ? assignedContext : ctx,
-      death = turretInfo ? 1 : render.status.getFade(),
-      fade = (turretInfo ? 1 : render.status.getFade()) * alpha,
+  return (x, y, instance, ratio, scale = 1, rot = 0, turretsObeyRot = false, assignedContext = false, turretInfo = false, render = instance.render) => {
+    let context = (assignedContext) ? assignedContext : ctx;
+    let fade = turretInfo ? 1 : render.status.getFade(),
       drawSize = scale * ratio * instance.size,
       m = mockups[instance.index],
       xx = x,
       yy = y,
-      source = turretInfo === false ? instance : turretInfo;
-    if (render.expandsWithDeath) drawSize *= 1 + 0.5 * (1 - death);
-    if (config.graphical.fancyAnimations && assignedContext != ctx2 && fade !== 1 || (!config.graphical.fancyAnimations && fade < 0.05)) {
+      source = (turretInfo === false) ? instance : turretInfo;
+    if (render.expandsWithDeath) drawSize *= (1 + 0.5 * (1 - fade));
+    if (config.graphical.fancyAnimations && assignedContext != ctx2 && fade !== 1) {
       context = ctx2;
       context.canvas.width = context.canvas.height = drawSize * m.position.axis + ratio * 20;
       xx = context.canvas.width / 2 - drawSize * m.position.axis * m.position.middle.x * Math.cos(rot) / 4;
@@ -2445,7 +2402,7 @@ const drawEntity = (() => {
           drawEntity(
             xx + len * Math.cos(ang),
             yy + len * Math.sin(ang),
-            t, ratio, 1, drawSize / ratio / t.size * t.sizeFactor,
+            t, ratio, drawSize / ratio / t.size * t.sizeFactor,
             source.turrets[i].facing + turretsObeyRot * rot,
             turretsObeyRot, context, source.turrets[i], render
           );
@@ -2496,7 +2453,7 @@ const drawEntity = (() => {
           drawEntity(
             xx + len * Math.cos(ang),
             yy + len * Math.sin(ang),
-            t, ratio, 1, drawSize / ratio / t.size * t.sizeFactor,
+            t, ratio, drawSize / ratio / t.size * t.sizeFactor,
             source.turrets[i].facing + turretsObeyRot * rot,
             turretsObeyRot, context, source.turrets[i], render
           );
@@ -2518,10 +2475,7 @@ const drawEntity = (() => {
   };
 })();
 
-function drawHealth(x, y, instance, ratio, alpha) {
-  let fade = instance.render.status.getFade();
-  fade *= fade;
-  ctx.globalAlpha = fade;
+function drawHealth(x, y, instance, ratio) {
   // Draw health bar
   ctx.globalAlpha = Math.pow(instance.render.status.getFade(), 2);
   let size = instance.size * ratio;
@@ -2533,11 +2487,10 @@ function drawHealth(x, y, instance, ratio, alpha) {
     let shield = instance.render.shield.get();
     if (health < 1 || shield < 1) {
       let yy = y + 1.1 * realSize + 15;
-      ctx.globalAlpha = alpha * alpha * fade;
       drawBar(x - size, x + size, yy, 3 + config.graphical.barChunk, color.black);
       drawBar(x - size, x - size + 2 * size * health, yy, 3, color.lgreen);
       if (shield) {
-        ctx.globalAlpha = (0.3 + shield * 0.3) * alpha * alpha * fade;
+        ctx.globalAlpha = 0.3 + shield * 0.3;
         drawBar(x - size, x - size + 2 * size * shield, yy, 3, color.teal);
         ctx.globalAlpha = 1;
       }
@@ -2546,25 +2499,25 @@ function drawHealth(x, y, instance, ratio, alpha) {
   // Draw label
   if (instance.nameplate && instance.id !== gui.playerid) {
     if (instance.render.textobjs == null) instance.render.textobjs = [TextObj(), TextObj()];
-    ctx.globalAlpha = alpha;
     if (instance.name !== '\u0000') {
       instance.render.textobjs[0].draw(
         instance.name,
         x, y - realSize - 30, 16, color.guiwhite, 'center'
       );
       instance.render.textobjs[1].draw(
-        handleLargeNumber(instance.score, true),
+        util.handleLargeNumber(instance.score, true),
         x, y - realSize - 16, 8, color.guiwhite, 'center'
       );
     } else {
       instance.render.textobjs[0].draw(
+        'a spoopy 👻',
         x, y - realSize - 30, 16, color.lavender, 'center'
       );
       instance.render.textobjs[1].draw(
+        util.handleLargeNumber(instance.score, true),
         x, y - realSize - 16, 8, color.lavender, 'center'
       );
     }
-    ctx.globalAlpha = 1;
   }
 }
 
@@ -2863,7 +2816,7 @@ const gameDraw = (() => {
           y = (instance.id === gui.playerid) ? 0 : ratio * instance.render.y - py;
         x += global.screenWidth / 2;
         y += global.screenHeight / 2;
-        drawEntity(x, y, instance, ratio, instance.alpha, 1.1, instance.render.f);
+        drawEntity(x, y, instance, ratio, 1.1, instance.render.f);
       });
       if (!config.graphical.screenshotMode) {
         entities.forEach(function entityhealthdrawingloop(instance) {
@@ -2871,7 +2824,7 @@ const gameDraw = (() => {
             y = (instance.id === gui.playerid) ? 0 : ratio * instance.render.y - py;
           x += global.screenWidth / 2;
           y += global.screenHeight / 2;
-          drawHealth(x, y, instance, ratio, instance.alpha);
+          drawHealth(x, y, instance, ratio);
         });
       }
     }
@@ -3038,7 +2991,7 @@ const gameDraw = (() => {
       drawBar(x + len * 0.1, x + len * (0.1 + 0.8 * ((max) ? Math.min(1, gui.__s.getScore() / max) : 1)), y + height / 2, height - 3.5, color.green);
       // Draw the score
       text.score.draw(
-        'Score: ' + handleLargeNumber(gui.__s.getScore()),
+        'Score: ' + util.handleLargeNumber(gui.__s.getScore()),
         x + len / 2, y + height / 2,
         height - 2, color.guiwhite, 'center', true
       );
@@ -3156,7 +3109,7 @@ const gameDraw = (() => {
         drawBar(x, x + len * shift, y + height / 2, height - 3.5, entry.barcolor);
         // Leadboard name + score 
         text.leaderboard[i++].draw(
-          entry.label + ': ' + handleLargeNumber(Math.round(entry.score)),
+          entry.label + ': ' + util.handleLargeNumber(Math.round(entry.score)),
           x + len / 2, y + height / 2,
           height - 5, color.guiwhite, 'center', true
         );
@@ -3164,7 +3117,7 @@ const gameDraw = (() => {
         let scale = height / entry.position.axis,
           xx = x - 1.5 * height - scale * entry.position.middle.x * 0.707,
           yy = y + 0.5 * height + scale * entry.position.middle.x * 0.707;
-        drawEntity(xx, yy, entry.image, 1 / scale, 1, scale * scale / entry.image.size, -Math.PI / 4, true);
+        drawEntity(xx, yy, entry.image, 1 / scale, scale * scale / entry.image.size, -Math.PI / 4, true);
         // Move down
         y += vspacing + height;
       });
@@ -3218,7 +3171,6 @@ const gameDraw = (() => {
           drawGuiRect(x, y, len, height);
           ctx.globalAlpha = 0.1;
           ctx.fillStyle = getColor(-10 + colorIndex++);
-          if (colorIndex === 14) colorIndex = 21;
           drawGuiRect(x, y, len, height * 0.6);
           ctx.fillStyle = color.black;
           drawGuiRect(x, y + height * 0.6, len, height * 0.4);
@@ -3229,7 +3181,7 @@ const gameDraw = (() => {
             scale = 0.6 * len / position.axis,
             xx = x + 0.5 * len - scale * position.middle.x * Math.cos(upgradeSpin),
             yy = y + 0.5 * height - scale * position.middle.x * Math.sin(upgradeSpin);
-          drawEntity(xx, yy, picture, 1, 1, scale / picture.size, upgradeSpin, true);
+          drawEntity(xx, yy, picture, 1, scale / picture.size, upgradeSpin, true);
           // Tank name
           text.upgradeNames[i - 1].draw(
             picture.name,
@@ -3255,7 +3207,7 @@ const gameDraw = (() => {
         });
         // Draw box
         let h = 14,
-          msg = "Ignore",
+          msg = "Don't Upgrade",
           m = measureText(msg, h - 3) + 10;
         let xx = xo + (xxx + len + internalSpacing - xo) / 2,
           yy = yo + height + internalSpacing;
@@ -3302,19 +3254,19 @@ const gameDrawDead = (() => {
         ((finalKills[1]) ? finalKills[1] + ' assists' : '') +
         (((finalKills[0] || finalKills[1]) && finalKills[2]) ? ' and ' : '') +
         ((finalKills[2]) ? finalKills[2] + ' visitors defeated' : '') :
-        ' A true pacifist.') +
+        ' A true pacifist') +
       '.';
   };
   let getDeath = () => {
     let txt = '';
     if (global.finalKillers.length) {
-      txt = '🔪 Killed by';
+      txt = '🔪 Succumbed to';
       global.finalKillers.forEach(e => {
-        txt += ' ' + addArticle(mockups[e].name) + ' and';
+        txt += ' ' + util.addArticle(mockups[e].name) + ' and';
       });
       txt = txt.slice(0, -4) + '.';
     } else {
-      txt += 'Died to server code.';
+      txt += '🤷 Well that was kinda dumb huh';
     }
     return txt;
   };
@@ -3328,20 +3280,20 @@ const gameDrawDead = (() => {
       scale = len / position.axis,
       xx = global.screenWidth / 2 - scale * position.middle.x * 0.707,
       yy = global.screenHeight / 2 - 35 + scale * position.middle.x * 0.707;
-    drawEntity(xx - 190 - len / 2, yy - 10, picture, 1.5, 1, 0.5 * scale / picture.realSize, -Math.PI / 4, true);
+    drawEntity(xx - 190 - len / 2, yy - 10, picture, 1.5, 0.5 * scale / picture.realSize, -Math.PI / 4, true);
     text.taunt.draw(
-      'You have died! (yay)', x, y - 80, 11, color.guiwhite, 'center'
+      'lol you died', x, y - 80, 8, color.guiwhite, 'center'
     );
     text.level.draw(
-      'n-level = ' + gui.__s.getLevel() + ' ' + mockups[gui.type].name + '.',
+      'Level ' + gui.__s.getLevel() + ' ' + mockups[gui.type].name + '.',
       x - 170, y - 30, 24, color.guiwhite
     );
     text.score.draw(
-      'The Grand total is: ' + formatLargeNumber(Math.round(global.finalScore.get())),
+      'Final score: ' + util.formatLargeNumber(Math.round(global.finalScore.get())),
       x - 170, y + 25, 50, color.guiwhite
     );
     text.time.draw(
-      'Existed for ' + timeForHumans(Math.round(global.finalLifetime.get())) + '.',
+      '⌚ Survived for ' + util.timeForHumans(Math.round(global.finalLifetime.get())) + '.',
       x - 170, y + 55, 16, color.guiwhite
     );
     text.kills.draw(
@@ -3375,7 +3327,7 @@ const gameDrawDisconnected = (() => {
   };
   return () => {
     clearScreen(mixColors(color.red, color.guiblack, 0.3), 0.25);
-    text.disconnected.draw('Disconnected', global.screenWidth / 2, global.screenHeight / 2, 30, color.guiwhite, 'center');
+    text.disconnected.draw('💀 Disconnected. 💀', global.screenWidth / 2, global.screenHeight / 2, 30, color.guiwhite, 'center');
     text.message.draw(global.message, global.screenWidth / 2, global.screenHeight / 2 + 30, 15, color.orange, 'center');
   };
 })();
