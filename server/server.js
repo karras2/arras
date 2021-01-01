@@ -5254,18 +5254,20 @@ var maintainloop = (() => {
   }
   placeRoids();
   // Spawning functions
+  // Spawning functions
   let spawnBosses = (() => {
     let timer = 0;
     let boss = (() => {
       let i = 0,
-        names = [],
-        bois = [Class.egg],
-        n = 0,
-        begin = 'yo some shit is about to move to a lower position',
-        arrival = 'Something happened lol u should probably let Neph know this broke',
-        loc = 'norm';
+          names = [],
+          bois = [Class.egg],
+          n = 0,
+          begin = 'yo some shit is about to move to a lower position',
+          arrival = 'Something happened lol u should probably let Neph know this broke',
+          loc = 'norm';
       let spawn = () => {
-        let spot, m = 0;
+        let spot,
+            m = 0;
         do {
           spot = room.randomType(loc);
           m++;
@@ -5300,24 +5302,20 @@ var maintainloop = (() => {
           // Wrap things up.
           setTimeout(() => sockets.broadcast(arrival), 5000);
           util.log('[SPAWN] ' + arrival);
-        },
+        }
       };
     })();
     return census => {
-      if (timer > 6000 && ran.dice(16000 - timer)) {
+      if (timer > 100) {
         util.log('[SPAWN] Preparing to spawn...');
         timer = 0;
         let choice = [];
-        switch (ran.chooseChance(40, 1)) {
+        switch (ran.chooseChance(1, 1)) {
           case 0:
-            choice = [
-              [Class.elite_destroyer], 2, 'a', 'nest'
-            ];
+            choice = [[Class.elite_destroyer, Class.elite_gunner, Class.elite_sprayer], 1, 'a', 'nest'];
             break;
           case 1:
-            choice = [
-              [Class.palisade], 1, 'castle', 'norm'
-            ];
+            choice = [[Class.palisade, Class.skimboss, Class.summoner], 1, 'castle', 'norm'];
             sockets.broadcast('A strange trembling...');
             break;
         }
@@ -5329,13 +5327,14 @@ var maintainloop = (() => {
   })();
   let spawnCrasher = census => {
     if (ran.chance(1 - 0.5 * census.crasher / room.maxFood / room.nestFoodAmount)) {
-      let spot, i = 30;
+      let spot,
+          i = 30;
       do {
         spot = room.randomType('nest');
         i--;
         if (!i) return 0;
       } while (dirtyCheck(spot, 100));
-      let type = (ran.dice(80)) ? ran.choose([Class.sentryGun, Class.sentrySwarm, Class.sentryTrap]) : Class.crasher;
+      let type = ran.dice(80) ? ran.choose([Class.sentryGun, Class.sentrySwarm, Class.sentryTrap]) : Class.crasher;
       let o = new Entity(spot);
       o.define(type);
       o.team = -100;
@@ -5344,22 +5343,24 @@ var maintainloop = (() => {
   // The NPC function
   let makenpcs = (() => {
     // Make base protectors if needed.
-    /*let f = (loc, team) => { 
-        let o = new Entity(loc);
-            o.define(Class.baseProtector);
-            o.team = -team;
-            o.color = [10, 11, 12, 15][team-1];
+    let f = (loc, team) => {
+      let o = new Entity(loc);
+      o.define(Class.baseProtector);
+      o.team = -team;
+      o.color = [10, 11, 12, 15][team - 1];
     };
-    for (let i=1; i<5; i++) {
-        room['bas' + i].forEach((loc) => { f(loc, i); }); 
-    }*/
+    for (let i = 1; i < 5; i++) {
+      room['bas' + i].forEach(loc => {
+        f(loc, i);
+      });
+    }
     // Return the spawning function
     let bots = [];
     return () => {
       let census = {
         crasher: 0,
         miniboss: 0,
-        tank: 0,
+        tank: 0
       };
       let npcs = entities.map(function npcCensus(instance) {
         if (census[instance.type] != null) {
@@ -5372,27 +5373,33 @@ var maintainloop = (() => {
       // Spawning
       spawnCrasher(census);
       spawnBosses(census);
-      /*/ Bots
-          if (bots.length < c.BOTS) {
-              let o = new Entity(room.random());
-              o.color = 17;
-              o.define(Class.bot);
-              o.define(Class.basic);
-              o.name += ran.chooseBotName();
-              o.refreshBodyAttributes();
-              o.color = 17;
-              bots.push(o);
-          }
-          // Remove dead ones
-          bots = bots.filter(e => { return !e.isDead(); });
-          // Slowly upgrade them
-          bots.forEach(o => {
-              if (o.skill.level < 45) {
-                  o.skill.score += 35;
-                  o.skill.maintain();
-              }
-          });
-      */
+      // Bots
+      if (bots.length < c.BOTS) {
+        let o = new Entity(room.random());
+        o.define(Class.bot);
+        o.define(Class.basic);
+        o.name += ran.chooseBotName();
+        o.refreshBodyAttributes();
+        o.skill.set([9, 9, 9, 9, 9, 0, 0, 0, 0, 0]);
+        o.color = 17;
+        if (c.MODE === "tdm") {
+          o.team = [-1, -2, -3, -4][Math.floor(Math.random() * 4)];
+          o.color = [10, 11, 12, 15][-o.team - 1];
+        }
+        bots.push(o);
+      }
+      // Remove dead ones
+      bots = bots.filter(e => {
+        return !e.isDead();
+      });
+      // Slowly upgrade them
+      bots.forEach(o => {
+        if (o.skill.level < 45) {
+          o.skill.score += 1000;
+          o.skill.maintain();
+        }
+        if (o.upgrades.length) o.upgrade(Math.floor(Math.random() * o.upgrades.length));
+      });
     };
   })();
   // The big food function

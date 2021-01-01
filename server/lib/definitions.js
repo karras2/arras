@@ -36,6 +36,7 @@ const skillSet = (() => {
     str: 2,
     dam: 3,
     spd: 4,
+
     shi: 5,
     atk: 6,
     hlt: 7,
@@ -52,13 +53,15 @@ const skillSet = (() => {
   };
 })();
 
-const g = { // Gun info here 
-  trap: [36, 1, 0.25, 0.6, 1, 0.75, 1, 5, 1, 1, 1, 15, 3],
+const g = { // Gun info here
+  trap: [36, 1, 0.25, 0.6, 1, 1, 1, 5, 1, 1, 1, 15, 3],
   swarm: [18, 0.25, 0.05, 0.4, 1, 0.75, 1, 4, 1, 1, 1, 5, 1],
-  drone: [50, 0.25, 0.1, 0.6, 1, 1, 1, 2, 1, 1, 1, 0.1, 1],
+  drone: [50, 0.25, 0.1, 0.6, 2, 1.25, 1.125, 2, 1, 1, 1, 0.1, 1],
+  summoner: [0.35, 1, 1, 1.125, 0.25, 0.25, 0.15, 1, 1, 1, 0.8, 1, 1],
   factory: [60, 1, 0.1, 0.7, 1, 0.75, 1, 3, 1, 1, 1, 0.1, 1],
   basic: [18, 1.4, 0.1, 1, 1, 0.75, 1, 4.5, 1, 1, 1, 15, 1],
-  /***************** RELOAD RECOIL SHUDDER  SIZE   HEALTH  DAMAGE   PEN    SPEED    MAX    RANGE  DENSITY  SPRAY   RESIST  */
+  destroyDominator: [7.5, 0, 0.5, 1, 5, 5, 5, 0.5, 1, 1.25, 10, 0.1, 1],
+  /***************** RELOAD RECOIL SHUDDER SIZE HEALTH DAMAGE PEN SPEED MAX RANGE DENSITY SPRAY RESIST */
   blank: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   spam: [1.1, 1, 1, 1.05, 1, 1.1, 1, 0.9, 0.7, 1, 1, 1, 1.05],
   minion: [1, 1, 2, 1, 0.4, 0.4, 1.2, 1, 1, 0.75, 1, 2, 1],
@@ -85,7 +88,7 @@ const g = { // Gun info here
   auto: /*pure*/ [1.8, 0.75, 0.5, 0.8, 0.9, 0.6, 1.2, 1.1, 1, 0.8, 1.3, 1, 1.25],
   five: [1.15, 1, 1, 1, 1, 1, 1, 1.05, 1.05, 1.1, 2, 1, 1],
   autosnipe: [1, 1, 1, 1.4, 2, 1, 1, 1, 1, 1, 1, 1, 1],
-  /***************** RELOAD RECOIL SHUDDER  SIZE   HEALTH  DAMAGE   PEN    SPEED    MAX    RANGE  DENSITY  SPRAY   RESIST  */
+  /***************** RELOAD RECOIL SHUDDER SIZE HEALTH DAMAGE PEN SPEED MAX RANGE DENSITY SPRAY RESIST */
   pound: [2, 1.6, 1, 1, 1, 2, 1, 0.85, 0.8, 1, 1.5, 1, 1.15],
   destroy: [2.2, 1.8, 0.5, 1, 2, 2, 1.2, 0.65, 0.5, 1, 2, 1, 3],
   anni: [0.8, 1.25, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -109,7 +112,7 @@ const g = { // Gun info here
   nail: [0.85, 2.5, 1, 0.8, 1, 0.7, 1, 1, 1, 1, 2, 1, 1],
   fast: [1, 1, 1, 1, 1, 1, 1, 1.2, 1, 1, 1, 1, 1],
   turret: [2, 1, 1, 1, 0.8, 0.6, 0.7, 1, 1, 1, 0.1, 1, 1],
-  /***************** RELOAD RECOIL SHUDDER  SIZE   HEALTH  DAMAGE   PEN    SPEED    MAX    RANGE  DENSITY  SPRAY   RESIST  */
+  /***************** RELOAD RECOIL SHUDDER SIZE HEALTH DAMAGE PEN SPEED MAX RANGE DENSITY SPRAY RESIST */
   battle: [1, 1, 1, 1, 1.25, 1.15, 1, 1, 0.85, 1, 1, 1, 1.1],
   bees: [1.3, 1, 1, 1.4, 1, 1.5, 0.5, 3, 1.5, 1, 0.25, 1, 1],
   carrier: [1.5, 1, 1, 1, 1, 0.8, 1, 1.3, 1.2, 1.2, 1, 1, 1],
@@ -141,7 +144,7 @@ const g = { // Gun info here
   notdense: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.1, 1, 1],
   halfrange: [1, 1, 1, 1, 1, 1, 1, 1, 1, 0.5, 1, 1, 1],
   fake: [1, 1, 1, 0.00001, 0.0001, 1, 1, 0.00001, 2, 0, 1, 1, 1],
-  /***************** RELOAD RECOIL SHUDDER  SIZE   HEALTH  DAMAGE   PEN    SPEED    MAX    RANGE  DENSITY  SPRAY   RESIST  */
+  /***************** RELOAD RECOIL SHUDDER SIZE HEALTH DAMAGE PEN SPEED MAX RANGE DENSITY SPRAY RESIST */
   op: [0.5, 1.3, 1, 1, 4, 4, 4, 3, 2, 1, 5, 2, 1],
   protectorswarm: [5, 0.000001, 1, 1, 100, 1, 1, 1, 1, 0.5, 5, 1, 10],
 };
@@ -603,8 +606,8 @@ exports.drone = {
     PENETRATION: 1.2,
     PUSHABILITY: 0.6,
     ACCELERATION: 0.05,
-    HEALTH: 0.6 * wepHealthFactor,
-    DAMAGE: 1.25 * wepDamageFactor,
+    HEALTH: 1 * wepHealthFactor,
+    DAMAGE: 1.5 * wepDamageFactor,
     SPEED: 3.8,
     RANGE: 200,
     DENSITY: 0.03,
@@ -661,7 +664,7 @@ exports.missile = {
     RANGE: 120,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [14, 6, 1, 0, -2, 130, 0, ],
     PROPERTIES: {
       AUTOFIRE: true,
@@ -686,11 +689,11 @@ exports.missile = {
 exports.hypermissile = {
   PARENT: [exports.missile],
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [14, 6, 1, 0, -2, 150, 0, ],
     PROPERTIES: {
       AUTOFIRE: true,
-      SHOOT_SETTINGS: combineStats([g.basic, g.skim, g.doublereload, g.lowpower, g.morerecoil, g.morespeed]),
+      SHOOT_SETTINGS: combineStats([g.basic, [3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]),
       TYPE: [exports.bullet, {
         PERSISTS_AFTER_DEATH: true,
       }],
@@ -700,7 +703,7 @@ exports.hypermissile = {
     POSITION: [14, 6, 1, 0, 2, 210, 0, ],
     PROPERTIES: {
       AUTOFIRE: true,
-      SHOOT_SETTINGS: combineStats([g.basic, g.skim, g.doublereload, g.lowpower, g.morerecoil, g.morespeed]),
+      SHOOT_SETTINGS: combineStats([g.basic, [3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]),
       TYPE: [exports.bullet, {
         PERSISTS_AFTER_DEATH: true,
       }],
@@ -710,7 +713,7 @@ exports.hypermissile = {
     POSITION: [14, 6, 1, 0, -2, 90, 0.5, ],
     PROPERTIES: {
       AUTOFIRE: true,
-      SHOOT_SETTINGS: combineStats([g.basic, g.skim, g.doublereload, g.lowpower, g.morerecoil, g.morespeed]),
+      SHOOT_SETTINGS: combineStats([g.basic, [3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]),
       TYPE: [exports.bullet, {
         PERSISTS_AFTER_DEATH: true,
       }],
@@ -719,7 +722,7 @@ exports.hypermissile = {
     POSITION: [14, 6, 1, 0, 2, 270, 0.5, ],
     PROPERTIES: {
       AUTOFIRE: true,
-      SHOOT_SETTINGS: combineStats([g.basic, g.skim, g.doublereload, g.lowpower, g.morerecoil, g.morespeed]),
+      SHOOT_SETTINGS: combineStats([g.basic, [3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]),
       TYPE: [exports.bullet, {
         PERSISTS_AFTER_DEATH: true,
       }],
@@ -734,7 +737,7 @@ exports.snake = {
     RANGE: 120,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [6, 12, 1.4, 8, 0, 180, 0, ],
     PROPERTIES: {
       AUTOFIRE: true,
@@ -775,7 +778,7 @@ exports.hive = {
     NO_LEAD: true,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [7, 9.5, 0.6, 7, 0, 108, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.swarm, g.hive, g.bees]),
@@ -865,7 +868,7 @@ exports.autoTurret = {
   COLOR: 16,
   //CONTROLLERS: ['nearestDifferentMaster'],
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [22, 10, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.gunner, g.power, g.morerecoil, g.turret]),
@@ -879,7 +882,7 @@ exports.machineAutoTurret = {
   COLOR: 16,
   //CONTROLLERS: ['nearestDifferentMaster'],
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [14, 11, 1.3, 8, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.gunner, g.power, g.morerecoil, g.turret, g.mach, g.slow]),
@@ -893,7 +896,7 @@ exports.autoSmasherTurret = {
   COLOR: 16,
   //CONTROLLERS: ['nearestDifferentMaster'],
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [20, 6, 1, 0, 5, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.gunner, g.power, g.morerecoil, g.turret, g.fast, g.mach, g.pound, g.morereload, g.morereload]),
@@ -915,7 +918,7 @@ exports.oldAutoSmasherTurret = {
   COLOR: 16,
   //CONTROLLERS: ['nearestDifferentMaster'],
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [20, 7, 1, 0, -5.75, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.gunner, g.power, g.lotsmorrecoil, g.morereload]),
@@ -941,7 +944,7 @@ exports.auto3gun = {
   CONTROLLERS: ['canRepel', 'onlyAcceptInArc', 'mapAltToFire', 'nearestDifferentMaster'],
   COLOR: 16,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [22, 10, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.flank, g.auto]),
@@ -958,7 +961,7 @@ exports.auto5gun = {
   CONTROLLERS: ['canRepel', 'onlyAcceptInArc', 'mapAltToFire', 'nearestDifferentMaster'],
   COLOR: 16,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [24, 11, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.flank, g.auto, g.five]),
@@ -976,7 +979,7 @@ exports.heavy3gun = {
   CONTROLLERS: ['canRepel', 'onlyAcceptInArc', 'mapAltToFire', 'nearestDifferentMaster'],
   COLOR: 16,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [22, 14, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.pound, g.auto]),
@@ -999,7 +1002,7 @@ exports.masterGun = {
     FULL_VIEW: true,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [8, 14, 1.3, 8, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.drone, g.master]),
@@ -1019,7 +1022,7 @@ exports.sniper3gun = {
   CONTROLLERS: ['canRepel', 'onlyAcceptInArc', 'mapAltToFire', 'nearestDifferentMaster'],
   COLOR: 16,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [27, 9, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.sniper, g.auto, g.assass, g.autosnipe]),
@@ -1036,7 +1039,7 @@ exports.bansheegun = {
   COLOR: 16,
   INDEPENDENT: true,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [26, 10, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.flank, g.auto, g.lessreload]),
@@ -1053,7 +1056,7 @@ exports.auto4gun = {
   CONTROLLERS: ['canRepel', 'onlyAcceptInArc', 'mapAltToFire', 'nearestDifferentMaster'],
   COLOR: 16,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [16, 4, 1, 0, -3.5, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.auto, g.gunner, g.twin, g.power, g.slow]),
@@ -1073,7 +1076,7 @@ exports.bigauto4gun = {
   CONTROLLERS: ['canRepel', 'onlyAcceptInArc', 'mapAltToFire', 'nearestDifferentMaster'],
   COLOR: 16,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [14, 5, 1, 0, -4.5, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.auto, g.gunner, g.twin, g.twin, g.power, g.halfreload]),
@@ -1099,7 +1102,7 @@ exports.tritrapgun = {
   LABEL: '',
   COLOR: 16,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [20, 16, 1, 0, 0, 0, 0, ],
   }, {
     POSITION: [2, 16, 1.1, 20, 0, 0, 0, ],
@@ -1165,7 +1168,7 @@ exports.baseSwarmTurret = {
   },
   INDEPENDENT: true,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [5, 4.5, 0.6, 7, 2, 0, 0.15, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.swarm, g.protectorswarm]),
@@ -1204,7 +1207,7 @@ exports.baseGunTurret = {
   INDEPENDENT: true,
   COLOR: 16,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [12, 12, 1, 6, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.destroy]),
@@ -1226,6 +1229,7 @@ exports.baseProtector = {
   SIZE: 64,
   DAMAGE_CLASS: 0,
   ACCEPTS_SCORE: false,
+  CAN_BE_ON_LEADERBOARD: false,
   SKILL: skillSet({
     rld: 1,
     dam: 1,
@@ -1247,7 +1251,7 @@ exports.baseProtector = {
   //CONTROLLERS: ['nearestDifferentMaster'],
   FACING_TYPE: 'autospin',
   TURRETS: [{
-    /*  SIZE     X       Y     ANGLE    ARC */
+    /* SIZE X Y ANGLE ARC */
     POSITION: [25, 0, 0, 0, 360, 0],
     TYPE: exports.dominationBody,
   }, {
@@ -1263,7 +1267,7 @@ exports.baseProtector = {
     POSITION: [12, 7, 0, 315, 100, 0],
     TYPE: exports.baseSwarmTurret,
   }, ],
-  GUNS: [ /***** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */ {
+  GUNS: [ /***** LENGTH WIDTH ASPECT X Y ANGLE DELAY */ {
     POSITION: [4.5, 11.5, -1.3, 6, 0, 45, 0, ],
   }, {
     POSITION: [4.5, 11.5, -1.3, 6, 0, 135, 0, ],
@@ -1311,7 +1315,7 @@ exports.minion = {
   ],
   //CONTROLLERS: ['nearestDifferentMaster'],
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [17, 9, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.minion]),
@@ -1330,7 +1334,7 @@ exports.pillboxTurret = {
   HAS_NO_RECOIL: true,
   //CONTROLLERS: ['nearestDifferentMaster'],
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [22, 11, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.minion, g.turret, g.power, g.auto, g.notdense]),
@@ -1351,7 +1355,7 @@ exports.pillbox = {
   },
   DIE_AT_RANGE: true,
   TURRETS: [{
-    /*  SIZE     X       Y     ANGLE    ARC */
+    /* SIZE X Y ANGLE ARC */
     POSITION: [11, 0, 0, 0, 360, 1],
     TYPE: exports.pillboxTurret,
   }]
@@ -1365,7 +1369,7 @@ exports.skimturret = {
   CONTROLLERS: ['canRepel', 'onlyAcceptInArc', 'mapAltToFire', 'nearestDifferentMaster'],
   LABEL: '',
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [10, 14, -0.5, 9, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.pound, g.arty, g.arty, g.skim]),
@@ -1373,28 +1377,6 @@ exports.skimturret = {
     },
   }, {
     POSITION: [17, 15, 1, 0, 0, 0, 0, ],
-  }, ],
-};
-exports.skimboss = {
-  PARENT: [exports.genericTank],
-  BODY: {
-    HEALTH: 300,
-    DAMAGE: 2,
-    SHIELD: 200,
-  },
-  SHAPE: 3,
-  COLOR: 2,
-  FACING_TYPE: 'autospin',
-  TURRETS: [{
-    /*  SIZE     X       Y     ANGLE    ARC */
-    POSITION: [15, 5, 0, 60, 170, 0],
-    TYPE: exports.skimturret,
-  }, {
-    POSITION: [15, 5, 0, 180, 170, 0],
-    TYPE: exports.skimturret,
-  }, {
-    POSITION: [15, 5, 0, 300, 170, 0],
-    TYPE: exports.skimturret,
   }, ],
 };
 
@@ -1416,7 +1398,7 @@ function makeAuto(type, name = -1, options = {}) {
 
   let output = JSON.parse(JSON.stringify(type));
   let autogun = {
-    /*********  SIZE               X       Y     ANGLE    ARC */
+    /********* SIZE X Y ANGLE ARC */
     POSITION: [turret.size, 0, 0, 180, 360, 1, ],
     TYPE: [turret.type, {
       CONTROLLERS: ['nearestDifferentMaster'],
@@ -1443,7 +1425,7 @@ function makeAuto(type, name = -1, options = {}) {
 function makeHybrid(type, name = -1) {
   let output = JSON.parse(JSON.stringify(type));
   let spawner = {
-    /********* LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /********* LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [7, 12, 1.2, 8, 0, 180, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.drone, g.weak]),
@@ -1478,7 +1460,7 @@ exports.basic = {
   LABEL: 'Basic',
   //CONTROLLERS: ['nearestDifferentMaster'],
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [18, 8, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic]),
@@ -1487,9 +1469,9 @@ exports.basic = {
       STAT_CALCULATOR: 0, // def
       WAIT_TO_CYCLE: false, // def
       AUTOFIRE: false, // def
-      SYNCS_SKILLS: false, // def         
-      MAX_CHILDREN: 0, // def  
-      ALT_FIRE: false, // def 
+      SYNCS_SKILLS: false, // def
+      MAX_CHILDREN: 0, // def
+      ALT_FIRE: false, // def
       NEGATIVE_RECOIL: false, // def
     },
   }, ],
@@ -1497,35 +1479,57 @@ exports.basic = {
 exports.testbed = {
   PARENT: [exports.genericTank],
   LABEL: 'TESTBED',
-  RESET_UPGRADES: true,
-  SKILL: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-  LEVEL: -1,
-  BODY: { // def
-    SHIELD: 1000,
-    REGEN: 10,
-    HEALTH: 100,
-    DAMAGE: 10,
-    DENSITY: 20,
-    FOV: 2,
-  },
-  TURRETS: [],
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [18, 10, -1.4, 0, 0, 0, 0, ],
     PROPERTIES: {
-      SHOOT_SETTINGS: combineStats([g.basic, g.op]),
-      TYPE: [exports.bullet, {
-        SHAPE: 5,
-      }],
+      SHOOT_SETTINGS: combineStats([g.basic]),
+      TYPE: exports.bullet
     },
-  }, ],
+  }],
+};
+exports.betaTanks = {
+  PARENT: [exports.genericTank],
+  LABEL: 'Beta Tanks',
+  GUNS: [{
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
+    POSITION: [18, 10, -1.4, 0, 0, 0, 0, ],
+    PROPERTIES: {
+      SHOOT_SETTINGS: combineStats([g.basic]),
+      TYPE: exports.bullet
+    },
+  }],
+};
+exports.bosses = {
+  PARENT: [exports.genericTank],
+  LABEL: 'Bosses',
+  GUNS: [{
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
+    POSITION: [18, 10, -1.4, 0, 0, 0, 0, ],
+    PROPERTIES: {
+      SHOOT_SETTINGS: combineStats([g.basic]),
+      TYPE: exports.bullet
+    },
+  }],
+};
+exports.misc = {
+  PARENT: [exports.genericTank],
+  LABEL: 'Misc',
+  GUNS: [{
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
+    POSITION: [18, 10, -1.4, 0, 0, 0, 0, ],
+    PROPERTIES: {
+      SHOOT_SETTINGS: combineStats([g.basic]),
+      TYPE: exports.bullet
+    },
+  }],
 };
 exports.single = {
   PARENT: [exports.genericTank],
   LABEL: 'Single',
   //CONTROLLERS: ['nearestDifferentMaster'],
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [19, 8, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.single]),
@@ -1546,7 +1550,7 @@ exports.smash = {
     DENSITY: base.DENSITY * 2,
   },
   TURRETS: [{
-    /** SIZE     X       Y     ANGLE    ARC */
+    /** SIZE X Y ANGLE ARC */
     POSITION: [21.5, 0, 0, 0, 360, 0, ],
     TYPE: exports.smasherBody,
   }],
@@ -1567,7 +1571,7 @@ exports.megasmash = {
   SKILL_CAP: [smshskl, 0, 0, 0, 0, smshskl, smshskl, smshskl, smshskl, smshskl, ],
   STAT_NAMES: statnames.smasher,
   TURRETS: [{
-    /** SIZE     X       Y     ANGLE    ARC */
+    /** SIZE X Y ANGLE ARC */
     POSITION: [24, 0, 0, 0, 360, 0, ],
     TYPE: exports.megasmashBody,
   }],
@@ -1586,7 +1590,7 @@ exports.spike = {
   SKILL_CAP: [smshskl, 0, 0, 0, 0, smshskl, smshskl, smshskl, smshskl, smshskl, ],
   STAT_NAMES: statnames.smasher,
   TURRETS: [{
-    /** SIZE     X       Y     ANGLE    ARC */
+    /** SIZE X Y ANGLE ARC */
     POSITION: [20.5, 0, 0, 0, 360, 0, ],
     TYPE: exports.spikeBody,
   }, {
@@ -1610,7 +1614,7 @@ exports.weirdspike = {
   SKILL_CAP: [smshskl, 0, 0, 0, 0, smshskl, smshskl, smshskl, smshskl, smshskl, ],
   STAT_NAMES: statnames.smasher,
   TURRETS: [{
-    /** SIZE     X       Y     ANGLE    ARC */
+    /** SIZE X Y ANGLE ARC */
     POSITION: [20.5, 0, 0, 0, 360, 0, ],
     TYPE: exports.spikeBody1,
   }, {
@@ -1628,14 +1632,14 @@ exports.twin = {
   PARENT: [exports.genericTank],
   LABEL: 'Twin',
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [20, 8, 1, 0, 5.5, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.twin]),
       TYPE: exports.bullet,
     },
   }, {
-    /* LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /* LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [20, 8, 1, 0, -5.5, 0, 0.5, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.twin]),
@@ -1648,7 +1652,7 @@ exports.gunner = {
   LABEL: 'Gunner',
   DANGER: 6,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [12, 3.5, 1, 0, 7.25, 0, 0.5, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.puregunner, g.fast]),
@@ -1682,7 +1686,7 @@ exports.machinegunner = {
     SPEED: base.SPEED * 0.9,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [14, 3, 4.0, -3, 5, 0, 0.6, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.puregunner, g.machgun]),
@@ -1724,7 +1728,7 @@ exports.nailgun = {
     SPEED: base.SPEED * 0.9,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [19, 2, 1, 0, -2.5, 0, 0.25, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.gunner, g.power, g.twin, g.nail]),
@@ -1752,7 +1756,7 @@ exports.double = {
   LABEL: 'Double Twin',
   DANGER: 6,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [20, 8, 1, 0, 5.5, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.double]),
@@ -1783,7 +1787,7 @@ exports.tripletwin = {
   LABEL: 'Triple Twin',
   DANGER: 7,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [20, 8, 1, 0, 5.5, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.spam, g.double]),
@@ -1827,7 +1831,7 @@ exports.split = {
   LABEL: 'Hewn Double',
   DANGER: 7,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [19, 8, 1, 0, 5.5, 25, 0.5, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.twin, g.double, g.hewn, g.morerecoil]),
@@ -1874,7 +1878,7 @@ exports.bent = {
     SPEED: base.SPEED * 0.9,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [19, 8, 1, 0, -2, -20, 0.5, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.bent]),
@@ -1899,7 +1903,7 @@ exports.bentdouble = {
   LABEL: 'Bent Double',
   DANGER: 7,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [19, 8, 1, 0, -1, -25, 0.5, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.bent, g.double]),
@@ -1945,7 +1949,7 @@ exports.penta = {
     SPEED: base.SPEED * 0.85,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [16, 8, 1, 0, -3, -30, 0.667, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.bent]),
@@ -1987,7 +1991,7 @@ exports.triple = {
   },
   LABEL: 'Triplet',
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [18, 10, 1, 0, 5, 0, 0.5, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.triple]),
@@ -2015,7 +2019,7 @@ exports.quint = {
   },
   LABEL: 'Quintuplet',
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [16, 10, 1, 0, -5, 0, 0.667, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.triple, g.quint]),
@@ -2054,9 +2058,9 @@ exports.dual = {
     ACCEL: base.ACCEL * 0.8,
     FOV: base.FOV * 1.1,
   },
-  LABEL: '',
+  LABEL: 'Dual',
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [18, 7, 1, 0, 5.5, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.dual, g.lowpower]),
@@ -2093,7 +2097,7 @@ exports.sniper = {
     FOV: base.FOV * 1.2,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [24, 8.5, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.sniper]),
@@ -2109,7 +2113,7 @@ exports.rifle = {
     FOV: base.FOV * 1.225,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [20, 10.5, 1, 0, 0, 0, 0, ],
   }, {
     POSITION: [24, 7, 1, 0, 0, 0, 0, ],
@@ -2129,7 +2133,7 @@ exports.assassin = {
     FOV: base.FOV * 1.4,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [27, 8.5, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.sniper, g.assass]),
@@ -2149,7 +2153,7 @@ exports.ranger = {
     FOV: base.FOV * 1.5,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [32, 8.5, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.sniper, g.assass]),
@@ -2171,7 +2175,7 @@ exports.hunter = {
     FOV: base.FOV * 1.25,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [24, 8, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.sniper, g.hunter, g.hunter2]),
@@ -2195,7 +2199,7 @@ exports.preda = {
     FOV: base.FOV * 1.3,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [24, 8, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.sniper, g.hunter, g.hunter2, g.hunter2, g.preda]),
@@ -2226,7 +2230,7 @@ exports.sidewind = {
     FOV: base.FOV * 1.3,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [10, 11, -0.5, 14, 0, 0, 0, ],
   }, {
     POSITION: [21, 12, -1.1, 0, 0, 0, 0, ],
@@ -2249,7 +2253,7 @@ exports.director = {
   },
   MAX_CHILDREN: 5,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [6, 12, 1.2, 8, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.drone, g.over]),
@@ -2262,7 +2266,7 @@ exports.director = {
 };
 exports.master = {
   PARENT: [exports.genericTank],
-  LABEL: '',
+  LABEL: 'Master',
   STAT_NAMES: statnames.drone,
   DANGER: 7,
   BODY: {
@@ -2271,7 +2275,7 @@ exports.master = {
   },
   FACING_TYPE: 'autospin',
   TURRETS: [{
-    /*  SIZE     X       Y     ANGLE    ARC */
+    /* SIZE X Y ANGLE ARC */
     POSITION: [16, 1, 0, 0, 0, 0],
     TYPE: exports.masterGun,
   }, {
@@ -2299,7 +2303,7 @@ exports.overseer = {
   },
   MAX_CHILDREN: 8,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [6, 12, 1.2, 8, 0, 90, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.drone, g.over]),
@@ -2333,7 +2337,7 @@ exports.overlord = {
   },
   MAX_CHILDREN: 8,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [6, 12, 1.2, 8, 0, 90, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.drone, g.over]),
@@ -2386,7 +2390,7 @@ exports.overtrap = {
     FOV: base.FOV * 1.2,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [6, 11, 1.2, 8, 0, 125, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.drone, g.over, g.meta]),
@@ -2430,7 +2434,7 @@ exports.banshee = {
   },
   FACING_TYPE: 'autospin',
   TURRETS: [{
-    /*  SIZE     X       Y     ANGLE    ARC */
+    /* SIZE X Y ANGLE ARC */
     POSITION: [10, 8, 0, 0, 80, 0],
     TYPE: exports.bansheegun,
   }, {
@@ -2441,7 +2445,7 @@ exports.banshee = {
     TYPE: exports.bansheegun,
   }, ],
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [6, 11, 1.2, 8, 0, 60, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.drone, g.over, g.meta]),
@@ -2488,7 +2492,7 @@ exports.overgunner = {
     FOV: base.FOV * 1.1,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [6, 11, 1.2, 8, 0, 125, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.drone, g.over, g.meta]),
@@ -2542,7 +2546,7 @@ function makeSwarmSpawner(guntype) {
       FULL_VIEW: true,
     },
     GUNS: [{
-      /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+      /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
       POSITION: [14, 15, 0.6, 14, 0, 0, 0, ],
       PROPERTIES: {
         SHOOT_SETTINGS: guntype,
@@ -2564,7 +2568,7 @@ exports.cruiser = {
     FOV: base.FOV * 1.2,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [7, 7.5, 0.6, 7, 4, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.swarm]),
@@ -2591,7 +2595,7 @@ exports.battleship = {
     FOV: base.FOV * 1.2,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [7, 7.5, 0.6, 7, 4, 90, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.swarm, g.battle]),
@@ -2636,7 +2640,7 @@ exports.carrier = {
     FOV: base.FOV * 1.3,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [7, 7.5, 0.6, 7, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.swarm, g.battle, g.carrier]),
@@ -2659,7 +2663,7 @@ exports.carrier = {
     },
   }],
 };
-exports.autocruiser = makeAuto(exports.cruiser, "");
+exports.autocruiser = makeAuto(exports.cruiser);
 exports.fortress = {
   PARENT: [exports.genericTank],
   LABEL: 'Fortress', //'Palisade',
@@ -2670,7 +2674,7 @@ exports.fortress = {
     FOV: base.FOV * 1.2,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [7, 7.5, 0.6, 7, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.swarm]),
@@ -2740,7 +2744,7 @@ exports.underseer = {
   SHAPE: 4,
   MAX_CHILDREN: 14,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [5, 12, 1.2, 8, 0, 90, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.drone, g.sunchip]),
@@ -2774,7 +2778,7 @@ exports.necromancer = {
   FACING_TYPE: 'autospin',
   MAX_CHILDREN: 14,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [5, 12, 1.2, 8, 0, 90, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.drone, g.sunchip]),
@@ -2828,7 +2832,7 @@ exports.lilfact = {
     FOV: 1.1,
   },
   GUNS: [{
-    /**** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /**** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [4.5, 10, 1, 10.5, 0, 0, 0, ],
   }, {
     POSITION: [1, 12, 1, 15, 0, 0, 0, ],
@@ -2855,7 +2859,7 @@ exports.factory = {
   },
   MAX_CHILDREN: 6,
   GUNS: [{
-    /**** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /**** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [5, 11, 1, 10.5, 0, 0, 0, ],
   }, {
     POSITION: [2, 14, 1, 15.5, 0, 0, 0, ],
@@ -2875,7 +2879,7 @@ exports.machine = {
   PARENT: [exports.genericTank],
   LABEL: 'Machine Gun',
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [12, 10, 1.4, 8, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.mach]),
@@ -2887,7 +2891,7 @@ exports.spray = {
   PARENT: [exports.genericTank],
   LABEL: 'Sprayer',
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [23, 7, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.gunner, g.lowpower, g.mach, g.morerecoil]),
@@ -2910,7 +2914,7 @@ exports.mini = {
     FOV: 1.2,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [22, 8, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.mini]),
@@ -2938,7 +2942,7 @@ exports.stream = {
     FOV: 1.3,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [25, 8, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.mini, g.stream]),
@@ -2980,7 +2984,7 @@ exports.minitrap = {
     FOV: 1.15,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [24, 8, 1, 0, 0, 0, 0, ],
   }, {
     POSITION: [4, 8, 1.3, 22, 0, 0, 0, ],
@@ -3014,7 +3018,7 @@ exports.pound = {
   },
   LABEL: 'Pounder',
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [20, 12, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.pound]),
@@ -3030,7 +3034,7 @@ exports.destroy = {
   },
   LABEL: 'Destroyer',
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [21, 14, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.pound, g.destroy]),
@@ -3046,7 +3050,7 @@ exports.anni = {
   LABEL: 'Annihilator',
   DANGER: 7,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [20.5, 19.5, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.pound, g.destroy, g.anni]),
@@ -3057,13 +3061,9 @@ exports.anni = {
 exports.hiveshooter = {
   PARENT: [exports.genericTank],
   DANGER: 6,
-  BODY: {
-    ACCELERATION: base.ACCEL * 0.75,
-    SPEED: base.speed * 0.8,
-  },
-  LABEL: '',
+  LABEL: 'Swarmer',
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [14, 14, -1.2, 5, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.pound, g.destroy, g.hive]),
@@ -3081,7 +3081,7 @@ exports.shotgun2 = {
   BODY: {
     ACCELERATION: base.ACCEL * 0.7,
   },
-  GUNS: [ /***** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */ {
+  GUNS: [ /***** LENGTH WIDTH ASPECT X Y ANGLE DELAY */ {
     POSITION: [4, 3, 1, 11, -3, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.mach, g.shotgun]),
@@ -3156,7 +3156,7 @@ exports.builder = {
     FOV: base.FOV * 1.15,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [18, 12, 1, 0, 0, 0, 0, ],
   }, {
     POSITION: [2, 12, 1.1, 18, 0, 0, 0, ],
@@ -3176,7 +3176,7 @@ exports.engineer = {
     FOV: base.FOV * 1.15,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [5, 11, 1, 10.5, 0, 0, 0, ],
   }, {
     POSITION: [3, 14, 1, 15.5, 0, 0, 0, ],
@@ -3203,7 +3203,7 @@ exports.construct = {
     FOV: base.FOV * 1.15,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [18, 18, 1, 0, 0, 0, 0, ],
   }, {
     POSITION: [2, 18, 1.2, 18, 0, 0, 0, ],
@@ -3223,7 +3223,7 @@ exports.conq = {
     SPEED: base.SPEED * 0.8,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [21, 14, 1, 0, 0, 180, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.pound]),
@@ -3249,7 +3249,7 @@ exports.bentboomer = {
     FOV: base.FOV * 1.15,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [8, 10, 1, 8, -2, -35, 0, ],
   }, {
     POSITION: [8, 10, 1, 8, 2, 35, 0, ],
@@ -3278,13 +3278,13 @@ exports.boomer = {
     FOV: base.FOV * 1.15,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [5, 10, 1, 14, 0, 0, 0, ],
   }, {
     POSITION: [6, 10, -1.5, 7, 0, 0, 0, ],
   }, {
-    //POSITION: [  12,    15,      1,      0,      0,      0,      0,   ],
-    //    }, {
+    //POSITION: [ 12, 15, 1, 0, 0, 0, 0, ],
+    // }, {
     POSITION: [2, 10, 1.3, 18, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.trap, g.block, g.boomerang]),
@@ -3302,7 +3302,7 @@ exports.quadtrapper = {
     FOV: base.FOV * 1.15,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [14, 6, 1, 0, 0, 45, 0, ],
   }, {
     POSITION: [2, 6, 1.1, 14, 0, 45, 0, ],
@@ -3342,7 +3342,7 @@ exports.artillery = {
   DANGER: 6,
   LABEL: 'Artillery',
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [17, 3, 1, 0, -6, -7, 0.25, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.gunner, g.arty]),
@@ -3370,7 +3370,7 @@ exports.mortar = {
   LABEL: 'Mortar',
   DANGER: 7,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [13, 3, 1, 0, -8, -7, 0.6, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.gunner, g.arty, g.twin]),
@@ -3415,7 +3415,7 @@ exports.skimmer = {
   LABEL: 'Skimmer',
   DANGER: 7,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [10, 14, -0.5, 9, 0, 0, 0, ],
   }, {
     POSITION: [17, 15, 1, 0, 0, 0, 0, ],
@@ -3431,7 +3431,7 @@ exports.spread = {
   LABEL: 'Spreadshot',
   DANGER: 7,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [13, 4, 1, 0, -0.8, -75, 5 / 6, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.gunner, g.arty, g.twin, g.spread]),
@@ -3518,7 +3518,7 @@ exports.flank = {
     SPEED: base.SPEED * 1.1,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [18, 8, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.flank]),
@@ -3543,7 +3543,7 @@ exports.hexa = {
   LABEL: 'Hexa Tank',
   DANGER: 6,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [18, 8, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.flank, g.flank]),
@@ -3586,7 +3586,7 @@ exports.octo = {
   LABEL: 'Octo Tank',
   DANGER: 7,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [18, 8, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.flank, g.flank, g.spam]),
@@ -3649,7 +3649,7 @@ exports.heptatrap = (() => {
     STAT_NAMES: statnames.trap,
     HAS_NO_RECOIL: true,
     GUNS: [{
-      /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+      /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
       POSITION: [15, 7, 1, 0, 0, 0, 0, ],
     }, {
       POSITION: [3, 7, 1.7, 15, 0, 0, 0, ],
@@ -3725,7 +3725,7 @@ exports.hexatrap = makeAuto({
   STAT_NAMES: statnames.trap,
   HAS_NO_RECOIL: true,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [15, 7, 1, 0, 0, 0, 0, ],
   }, {
     POSITION: [3, 7, 1.7, 15, 0, 0, 0, ],
@@ -3792,7 +3792,7 @@ exports.tri = {
   },
   DANGER: 6,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [18, 8, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.flank, g.tri, g.trifront, g.tonsmorrecoil]),
@@ -3825,7 +3825,7 @@ exports.booster = {
   },
   DANGER: 7,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [18, 8, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.flank, g.tri, g.trifront, g.muchmorerecoil]),
@@ -3870,7 +3870,7 @@ exports.fighter = {
   },
   DANGER: 7,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [18, 8, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.flank, g.tri, g.trifront]),
@@ -3915,7 +3915,7 @@ exports.brutalizer = {
   },
   DANGER: 7,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [18, 8, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.flank, g.tri, g.trifront]),
@@ -3960,7 +3960,7 @@ exports.bomber = {
   },
   DANGER: 7,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [20, 8, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.flank, g.tri, g.trifront]),
@@ -4005,7 +4005,7 @@ exports.falcon = {
     FOV: base.FOV * 1.2,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [27, 8.5, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.sniper, g.assass, g.lessreload]),
@@ -4045,7 +4045,7 @@ exports.auto3 = {
   DANGER: 6,
   FACING_TYPE: 'autospin',
   TURRETS: [{
-    /*  SIZE     X       Y     ANGLE    ARC */
+    /* SIZE X Y ANGLE ARC */
     POSITION: [11, 8, 0, 0, 190, 0],
     TYPE: exports.auto3gun,
   }, {
@@ -4062,7 +4062,7 @@ exports.auto5 = {
   DANGER: 7,
   FACING_TYPE: 'autospin',
   TURRETS: [{
-    /*  SIZE     X       Y     ANGLE    ARC */
+    /* SIZE X Y ANGLE ARC */
     POSITION: [11, 8, 0, 0, 190, 0],
     TYPE: exports.auto5gun,
   }, {
@@ -4088,7 +4088,7 @@ exports.heavy3 = {
   DANGER: 7,
   FACING_TYPE: 'autospin',
   TURRETS: [{
-    /*  SIZE     X       Y     ANGLE    ARC */
+    /* SIZE X Y ANGLE ARC */
     POSITION: [14, 8, 0, 0, 190, 0],
     TYPE: exports.heavy3gun,
   }, {
@@ -4108,7 +4108,7 @@ exports.tritrap = {
   DANGER: 6,
   FACING_TYPE: 'autospin',
   TURRETS: [{
-    /*  SIZE     X       Y     ANGLE    ARC */
+    /* SIZE X Y ANGLE ARC */
     POSITION: [12, 8, 0, 0, 190, 0],
     TYPE: exports.tritrapgun,
   }, {
@@ -4130,7 +4130,7 @@ exports.sniper3 = {
   },
   FACING_TYPE: 'autospin',
   TURRETS: [{
-    /*  SIZE     X       Y     ANGLE    ARC */
+    /* SIZE X Y ANGLE ARC */
     POSITION: [13, 8, 0, 0, 170, 0],
     TYPE: exports.sniper3gun,
   }, {
@@ -4147,7 +4147,7 @@ exports.auto4 = {
   LABEL: 'Auto-4',
   FACING_TYPE: 'autospin',
   TURRETS: [{
-    /*  SIZE     X       Y     ANGLE    ARC */
+    /* SIZE X Y ANGLE ARC */
     POSITION: [13, 6, 0, 45, 160, 0],
     TYPE: exports.auto4gun,
   }, {
@@ -4168,7 +4168,7 @@ exports.flanktrap = {
   STAT_NAMES: statnames.generic,
   DANGER: 6,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [20, 8, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.flank, g.flank]),
@@ -4194,7 +4194,7 @@ exports.guntrap = {
     FOV: base.FOV * 1.25,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [19, 2, 1, 0, -2.5, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.gunner, g.power, g.twin, g.tonsmorrecoil, g.lotsmorrecoil]),
@@ -4228,7 +4228,7 @@ exports.bushwhack = {
   },
   DANGER: 7,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [24, 8.5, 1, 0, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.sniper, g.morerecoil]),
@@ -4247,7 +4247,8 @@ exports.bushwhack = {
 };
 
 // UPGRADE PATHS
-exports.testbed.UPGRADES_TIER_1 = [
+exports.testbed.UPGRADES_TIER_1 = [exports.betaTanks, exports.bosses, exports.misc];
+exports.betaTanks.UPGRADES_TIER_1 = [
   exports.autocruiser,
   exports.master,
   exports.dual,
@@ -4296,28 +4297,30 @@ exports.cruiser.UPGRADES_TIER_3 = [exports.carrier, exports.battleship, exports.
 
 
 /*exports.smash.UPGRADES_TIER_3 = [exports.megasmash, exports.spike, exports.autosmash];
-        
+
 exports.twin.UPGRADES_TIER_2 = [exports.double, exports.bent, exports.triple, exports.hexa];
-    exports.double.UPGRADES_TIER_3 = [exports.tripletwin, exports.autodouble];
-    exports.bent.UPGRADES_TIER_3 = [exports.penta, exports.benthybrid];
-    exports.triple.UPGRADES_TIER_3 = [exports.quint];
+exports.double.UPGRADES_TIER_3 = [exports.tripletwin, exports.autodouble];
+exports.bent.UPGRADES_TIER_3 = [exports.penta, exports.benthybrid];
+exports.triple.UPGRADES_TIER_3 = [exports.quint];
+
 exports.sniper.UPGRADES_TIER_2 = [exports.assassin, exports.overseer, exports.hunter, exports.builder];
-    exports.assassin.UPGRADES_TIER_3 = [exports.ranger];
-    exports.overseer.UPGRADES_TIER_3 = [exports.overlord, exports.battleship
-        , exports.overtrap, exports.necromancer, exports.factory, exports.fortress];
-    exports.hunter.UPGRADES_TIER_3 = [exports.preda, exports.poach];
-    exports.builder.UPGRADES_TIER_3 = [exports.construct, exports.autobuilder];
-    
+exports.assassin.UPGRADES_TIER_3 = [exports.ranger];
+exports.overseer.UPGRADES_TIER_3 = [exports.overlord, exports.battleship
+, exports.overtrap, exports.necromancer, exports.factory, exports.fortress];
+exports.hunter.UPGRADES_TIER_3 = [exports.preda, exports.poach];
+exports.builder.UPGRADES_TIER_3 = [exports.construct, exports.autobuilder];
+
 exports.machine.UPGRADES_TIER_2 = [exports.destroy, exports.gunner, exports.artillery];
-    exports.destroy.UPGRADES_TIER_3 = [exports.anni, exports.hybrid];
-    exports.gunner.UPGRADES_TIER_3 = [exports.autogunner, exports.mortar, exports.stream];
-    exports.artillery.UPGRADES_TIER_3 = [exports.mortar, exports.spread, exports.skimmer];
-    exports.machine.UPGRADES_TIER_3 = [exports.spray];
+exports.destroy.UPGRADES_TIER_3 = [exports.anni, exports.hybrid];
+exports.gunner.UPGRADES_TIER_3 = [exports.autogunner, exports.mortar, exports.stream];
+exports.artillery.UPGRADES_TIER_3 = [exports.mortar, exports.spread, exports.skimmer];
+exports.machine.UPGRADES_TIER_3 = [exports.spray];
+
 exports.flank.UPGRADES_TIER_2 = [exports.hexa, exports.tri, exports.auto3, exports.flanktrap];
-    exports.hexa.UPGRADES_TIER_3 = [exports.octo];
-    exports.tri.UPGRADES_TIER_3 = [exports.booster, exports.fighter, exports.bomber, exports.autotri];
-    exports.auto3.UPGRADES_TIER_3 = [exports.auto5, exports.heavy3];
-    exports.flanktrap.UPGRADES_TIER_3 = [exports.guntrap, exports.fortress, exports.bomber];*/
+exports.hexa.UPGRADES_TIER_3 = [exports.octo];
+exports.tri.UPGRADES_TIER_3 = [exports.booster, exports.fighter, exports.bomber, exports.autotri];
+exports.auto3.UPGRADES_TIER_3 = [exports.auto5, exports.heavy3];
+exports.flanktrap.UPGRADES_TIER_3 = [exports.guntrap, exports.fortress, exports.bomber];*/
 
 // NPCS:
 exports.crasher = {
@@ -4400,7 +4403,7 @@ exports.trapTurret = {
     FULL_VIEW: true,
   },
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [16, 14, 1, 0, 0, 0, 0, ],
   }, {
     POSITION: [4, 14, 1.8, 16, 0, 0, 0, ],
@@ -4469,7 +4472,7 @@ exports.crasherSpawner = {
   },
   MAX_CHILDREN: 4,
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [6, 12, 1.2, 8, 0, 0, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.drone, g.weak, g.weak]),
@@ -4489,7 +4492,7 @@ exports.elite = {
   LABEL: 'Elite Crasher',
   COLOR: 5,
   SHAPE: 3,
-  SIZE: 20,
+  SIZE: 40,
   VARIES_IN_SIZE: true,
   VALUE: 150000,
   BODY: {
@@ -4504,7 +4507,7 @@ exports.elite = {
 exports.elite_destroyer = {
   PARENT: [exports.elite],
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [5, 16, 1, 6, 0, 180, 0, ],
     PROPERTIES: {
       SHOOT_SETTINGS: combineStats([g.basic, g.pound, g.pound, g.destroy]),
@@ -4527,7 +4530,7 @@ exports.elite_destroyer = {
     },
   }, ],
   TURRETS: [{
-    /*********  SIZE     X       Y     ANGLE    ARC */
+    /********* SIZE X Y ANGLE ARC */
     POSITION: [11, 0, 0, 180, 360, 0, ],
     TYPE: [exports.crasherSpawner]
   }, {
@@ -4547,7 +4550,7 @@ exports.elite_destroyer = {
 exports.elite_gunner = {
   PARENT: [exports.elite],
   GUNS: [{
-    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    /*** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
     POSITION: [14, 16, 1, 0, 0, 180, 0, ],
   }, {
     POSITION: [4, 16, 1.5, 14, 0, 180, 0, ],
@@ -4566,7 +4569,7 @@ exports.elite_gunner = {
     NO_LEAD: false,
   },
   TURRETS: [{
-    /*********  SIZE     X       Y     ANGLE    ARC */
+    /********* SIZE X Y ANGLE ARC */
     POSITION: [14, 8, 0, 60, 180, 0, ],
     TYPE: [exports.auto4gun],
   }, {
@@ -4580,7 +4583,7 @@ exports.elite_sprayer = {
     NO_LEAD: false,
   },
   TURRETS: [{
-    /*  SIZE     X       Y     ANGLE    ARC */
+    /* SIZE X Y ANGLE ARC */
     POSITION: [14, 6, 0, 180, 190, 0],
     TYPE: [exports.spray, {
       COLOR: 5,
@@ -4613,7 +4616,7 @@ exports.palisade = (() => {
     LABEL: 'Rogue Palisade',
     COLOR: 17,
     SHAPE: 6,
-    SIZE: 28,
+    SIZE: 40,
     VALUE: 500000,
     BODY: {
       FOV: 1.3,
@@ -4624,7 +4627,7 @@ exports.palisade = (() => {
       DAMAGE: base.DAMAGE * 3,
     },
     GUNS: [{
-      /**** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+      /**** LENGTH WIDTH ASPECT X Y ANGLE DELAY */
       POSITION: [4, 6, -1.6, 8, 0, 0, 0, ],
       PROPERTIES: props,
     }, {
@@ -4652,7 +4655,7 @@ exports.palisade = (() => {
       PROPERTIES: props,
     }, ],
     TURRETS: [{
-      /*  SIZE     X       Y     ANGLE    ARC */
+      /* SIZE X Y ANGLE ARC */
       POSITION: [5, 10, 0, 30, 110, 0],
       TYPE: exports.trapTurret,
     }, {
@@ -4673,6 +4676,149 @@ exports.palisade = (() => {
     }, ],
   };
 })();
+exports.skimboss = {
+  PARENT: [exports.miniboss],
+  LABEL: "Elite Skimmer",
+  SIZE: 40,
+  VALUE: 500000,
+  BODY: {
+    FOV: 1.3,
+    SPEED: base.SPEED * 0.1,
+    HEALTH: base.HEALTH * 2,
+    SHIELD: base.SHIELD * 2,
+    REGEN: base.REGEN,
+    DAMAGE: base.DAMAGE * 3,
+  },
+  SHAPE: 3,
+  COLOR: 2,
+  FACING_TYPE: 'autospin',
+  TURRETS: [{
+    /* SIZE X Y ANGLE ARC */
+    POSITION: [15, 5, 0, 60, 170, 0],
+    TYPE: exports.skimturret,
+  }, {
+    POSITION: [15, 5, 0, 180, 170, 0],
+    TYPE: exports.skimturret,
+  }, {
+    POSITION: [15, 5, 0, 300, 170, 0],
+    TYPE: exports.skimturret,
+  }, ],
+};
+exports.summoner = {
+  PARENT: [exports.miniboss],
+  LABEL: "Summoner",
+  DANGER: 8,
+  SHAPE: 4,
+  COLOR: 13,
+  SIZE: 40,
+  MAX_CHILDREN: 28,
+  FACING_TYPE: "autospin",
+  VALUE: 300000,
+  BODY: {
+    FOV: 1.3,
+    SPEED: base.SPEED * 0.1,
+    HEALTH: base.HEALTH * 2,
+    SHIELD: base.SHIELD * 2,
+    REGEN: base.REGEN,
+    DAMAGE: base.DAMAGE * 3,
+  },
+  GUNS: [{
+    /*** LENGTH  WIDTH   ASPECT    X       Y     ANGLE   DELAY */
+    POSITION: [3.5, 8.65, 1.2, 8, 0, 90, 0],
+    PROPERTIES: {
+      SHOOT_SETTINGS: combineStats([g.drone, g.summoner]),
+      TYPE: exports.sunchip,
+      AUTOFIRE: true,
+      SYNCS_SKILLS: true,
+      STAT_CALCULATOR: gunCalcNames.necro,
+      WAIT_TO_CYCLE: true
+    }
+  }, {
+    POSITION: [3.5, 8.65, 1.2, 8, 0, 270, 0.5],
+    PROPERTIES: {
+      SHOOT_SETTINGS: combineStats([g.drone, g.summoner]),
+      TYPE: exports.sunchip,
+      AUTOFIRE: true,
+      SYNCS_SKILLS: true,
+      STAT_CALCULATOR: gunCalcNames.necro,
+      WAIT_TO_CYCLE: true
+    }
+  }, {
+    POSITION: [3.5, 8.65, 1.2, 8, 0, 0, 0.25],
+    PROPERTIES: {
+      SHOOT_SETTINGS: combineStats([g.drone, g.summoner]),
+      TYPE: exports.sunchip,
+      AUTOFIRE: true,
+      SYNCS_SKILLS: true,
+      STAT_CALCULATOR: gunCalcNames.necro,
+      WAIT_TO_CYCLE: true
+    }
+  }, {
+    POSITION: [3.5, 8.65, 1.2, 8, 0, 180, 0.75],
+    PROPERTIES: {
+      SHOOT_SETTINGS: combineStats([g.drone, g.summoner]),
+      TYPE: exports.sunchip,
+      AUTOFIRE: true,
+      SYNCS_SKILLS: true,
+      STAT_CALCULATOR: gunCalcNames.necro,
+      WAIT_TO_CYCLE: true
+    }
+  }]
+};
+
+exports.dominationBody = {
+  LABEL: "",
+  CONTROLLERS: ["dontTurn"],
+  COLOR: 9,
+  SHAPE: 600,
+  INDEPENDENT: true
+};
+exports.dominator = {
+  PARENT: [exports.genericTank],
+  LABEL: "Dominator",
+  DANGER: 10,
+  SKILL: skillSet({
+    rld: 1,
+    dam: 1,
+    pen: 1,
+    str: 1,
+    spd: 1
+  }),
+  LEVEL: -1,
+  BODY: {
+    HEALTH: base.HEALTH * 40,
+    DAMAGE: base.DAMAGE * 10,
+    FOV: 2,
+    PUSHABILITY: 0,
+    SHIELD: base.SHIELD * 5,
+    DENSITY: 100,
+  },
+  CONTROLLERS: [
+    'nearestDifferentMaster'
+  ],
+  DISPLAY_NAME: true,
+  TURRETS: [{
+    POSITION: [22, 0, 0, 0, 360, 0],
+    TYPE: exports.dominationBody
+  }],
+  CAN_BE_ON_LEADERBOARD: false,
+  GIVE_KILL_MESSAGE: false,
+  ACCEPTS_SCORE: false,
+  DOMTIME: true
+};
+exports.destroyerDominator = {
+  LABEL: "Dominator",
+  PARENT: [exports.dominator],
+  GUNS: [{
+    POSITION: [15.85, 8.5, 1, 0, 0, 0, 0],
+    PROPERTIES: {
+      SHOOT_SETTINGS: combineStats([g.basic, g.destroyDominator]),
+      TYPE: exports.bullet
+    }
+  }, {
+    POSITION: [5, 8.5, -1.6, 6.25, 0, 0, 0]
+  }]
+};
 
 exports.bot = {
   AUTO_UPGRADE: 'random',
@@ -4690,4 +4836,4 @@ exports.bot = {
   },
 };
 
-exports.testbed.UPGRADES_TIER_1.push(exports.elite_sprayer);
+exports.bosses.UPGRADES_TIER_1 = [exports.elite_destroyer, exports.elite_gunner, exports.elite_sprayer, exports.palisade, exports.skimboss, exports.summoner];
