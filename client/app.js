@@ -1798,7 +1798,8 @@ const socketInit = (() => {
   })();
   // The initialization function (this is returned)
   return port => {
-    let socket = new WebSocket('wss://' + window.location.hostname);
+    let WSLINK = window.location.hostname.includes("localhost") ? `ws://${window.location.hostname}:3000` : 'wss://' + window.location.hostname;
+    let socket = new WebSocket(WSLINK);
     // Set up our socket
     socket.binaryType = 'arraybuffer';
     socket.open = false;
