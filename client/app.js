@@ -270,18 +270,16 @@ function getColorDark(givenColor) {
 
 function getZoneColor(cell, real) {
   switch (cell) {
-    case 'bas1': case 'dom1':
+    case 'bas1':
       return color.blue;
-    case 'bas2': case 'dom2':
+    case 'bas2':
       return color.green;
-    case 'bas3': case 'dom3':
+    case 'bas3':
       return color.red;
-    case 'bas4': case 'dom4':
+    case 'bas4':
       return color.pink;
     case 'nest':
       return (real) ? color.purple : color.lavender;
-    case 'dom0':
-      return color.gold;
     default:
       return (real) ? color.white : color.lgrey;
   }
@@ -780,7 +778,7 @@ window.onload = () => {
       provider = "Localhost";
       break;
   }
-  window.port = 6969;
+  window.port = 3000;
   if (window.top.location.href.includes("8080")) window.port = 8080;
   if (window.top.location.href.includes("6969")) window.port = 6969;
   let PORTID = 0;
@@ -802,7 +800,7 @@ window.onload = () => {
       console.log("That is not a valid port!");
     }
   };
-  setPort(window.port);
+  window.setPort(window.port);
   // Save forms
   util.retrieveFromLocalStorage('playerNameInput');
   util.retrieveFromLocalStorage('playerKeyInput');
@@ -1822,7 +1820,7 @@ const socketInit = (() => {
   })();
   // The initialization function (this is returned)
   return port => {
-    let socket = new WebSocket('ws://' + window.location.hostname + ":" + window.port);
+    let socket = new WebSocket('wss://' + window.location.hostname);
     // Set up our socket
     socket.binaryType = 'arraybuffer';
     socket.open = false;

@@ -101,11 +101,6 @@ room.findType('bas3');
 room.findType('bas4');
 room.findType('roid');
 room.findType('rock');
-room.findType("dom0");
-room.findType("dom1");
-room.findType("dom2");
-room.findType("dom3");
-room.findType("dom4");
 room.nestFoodAmount = 1.5 * Math.sqrt(room.nest.length) / room.xgrid / room.ygrid;
 room.random = () => {
   return {
@@ -3135,7 +3130,10 @@ var express = require('express'),
 // Give the client upon request
 exportDefintionsToClient(__dirname + '/./client/json/mockups.json');
 generateVersionControlHash(__dirname + '/./client/api/vhash');
-if (c.servesStatic) app.use(express.static(__dirname + './client'));
+app.use(express.static('client'));
+app.get("/", (request, response) => {
+  response.sendFile(__dirname + "/client/index.html");
+});
 
 // Websocket behavior
 const sockets = (() => {
@@ -5310,47 +5308,6 @@ var maintainloop = (() => {
     util.log('Placing ' + count + ' obstacles!');
   }
   placeRoids();
-  let doms = {};
-  let dominators = [];
-  let rooms = [["NW", "Northern", "NE"], ["Western", "Center", "Eastern"], ["SW", "Southern", "SE"]];
-  let createDom = (loc, mode, type) => {
-    let o = new Entity(loc);
-    let wrong = 11;
-    o.define(type);
-    o.isDominator = true;
-    o.team = mode || -100;
-    o.color = [3, 10, 11, 12, 15, 5, 19, 0, 2][-mode];
-    o.SIZE = 50;
-    let teamCode = ['ai', 'blue', 'green', 'red', 'purple', 'pink', 'black', 'teal', 'orange'][-mode];
-    o.ondead = () => {
-      let lastKnownTeam = o.team;
-      console.log("Dom was on " + lastKnownTeam);
-      let killers = [];
-      for (let instance of o.collisionArray) if (instance.team >= -8 && instance.team <= -1)
-        // And keep track of who killed me
-        killers.push(instance.team);
-      let pwned = mode ? 0 : killers.length ? ran.choose(killers) : 0;
-      for (let id of Object.keys(doms)) if (doms[id] !== pwned) wrong = wrong + 1;
-      createDom(loc, pwned, type);
-      if (pwned) room.setType('dom' + -pwned, loc); else room.setType('dom0', loc);
-      sockets.broadcast("The " + rooms[Math.floor(3 * loc.y / room.height)][Math.floor(3 * loc.x / room.height)] + " Dominator is " + (pwned ? "now controlled by " + ["BLUE", "GREEN", "RED", "PURPLE", "PINK", "BLACK", "TEAL", "ORANGE"][-1 - pwned] : "being contested"), [3, 10, 11, 12, 15, 5, 19, 52, 2][-pwned]);
-      doms[loc.id] = pwned || -100;
-      /*if (c.NAME.includes("Domination")) {
-        teamCode = ['blue', 'green', 'red', 'purple', 'pink', 'black', 'teal', 'orange'][-1 - pwned];
-        if (pwned >= -8 && pwned <= -1) dominators[teamCode].push(o);
-        let teamArray = ['blue', 'green', 'red', 'purple', 'pink', 'black', 'teal', 'orange'];
-        console.log(-1 - lastKnownTeam);
-        teamCode = teamArray[-1 - lastKnownTeam];
-        console.log(teamCode);
-        if (lastKnownTeam !== -100) dominators[teamCode].splice(dominators[teamCode].length - 1, 1);
-        //if (dominators.blue.length === c.DOMS_NEEDED) teamWon("BLUE", 10)
-        //if (dominators.green.length === c.DOMS_NEEDED) teamWon("GREEN", 11)
-        //if (dominators.red.length === c.DOMS_NEEDED) teamWon("RED", 12)
-        //if (dominators.purple.length === c.DOMS_NEEDED) teamWon("PURPLE", 15)
-      }*/
-    };
-    doms[loc.id] = -100;
-  };
   function generateMaze(size) {
     let maze = JSON.parse(JSON.stringify(Array(size).fill(Array(size).fill(true))));
     maze[0] = Array(size).fill(false);
@@ -5555,9 +5512,6 @@ var maintainloop = (() => {
       if (false) room['bas' + i].forEach(loc => {
         f(loc, i);
       });
-    }
-    for (let loc of room["dom0"]) {
-      createDom(loc, 0, ran.choose([Class.destroyerDominator, Class.gunnerDominator, Class.trapperDominator]));
     }
     // Return the spawning function
     let bots = [];
@@ -5925,7 +5879,7 @@ var speedcheckloop = (() => {
       util.warn('Total time: ' + (activationtime + collidetime + movetime + playertime + maptime + physicstime + lifetime + selfietime));
       if (fails > 60) {
         util.error("FAILURE!");
-        //process.exit(1);
+        process.exit(1);
       }
     } else {
       fails = 0;
