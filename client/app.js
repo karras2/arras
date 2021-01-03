@@ -778,29 +778,7 @@ window.onload = () => {
       provider = "Localhost";
       break;
   }
-  window.port = 3000;
-  if (window.top.location.href.includes("8080")) window.port = 8080;
-  if (window.top.location.href.includes("6969")) window.port = 6969;
-  let PORTID = 0;
-  window.setPort = (port) => {
-    PORTID ++;
-    if (PORTID > 2) PORTID = 0;
-    let ports = [3000, 8080, 6969];
-    if (ports.includes(port)) {
-      console.log("Port set!");
-      window.port = port;
-      let names = [`${provider} | FFA`, `${provider} | 4 Teams`, `${provider} | Staging`];
-      serverName = names[ports.indexOf(port)];
-      document.getElementById('serverName').innerHTML = '<h4 class="nopadding">' + serverName + ' (Click to switch)</h4>';
-      document.getElementById('serverName').onclick = function() {
-        let port = ports[PORTID];
-        window.setPort(port);
-      };
-    } else {
-      console.log("That is not a valid port!");
-    }
-  };
-  window.setPort(window.port);
+  document.getElementById('serverName').innerHTML = '<h4 class="nopadding">' + serverName + " - " + provider + '</h4>';
   // Save forms
   util.retrieveFromLocalStorage('playerNameInput');
   util.retrieveFromLocalStorage('playerKeyInput');
