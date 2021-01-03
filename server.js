@@ -3082,7 +3082,7 @@ var express = require('express'),
     // Remove them
     purgeEntities();
     // Build the function to return
-    let writeData = JSON.stringify(mockupData, null, 2); // Make it easy to read <3
+    let writeData = JSON.stringify(mockupData);//, null, 2); // Make it easy to read <3 or don't because it causes a little loading time...
     return loc => {
       util.log('Preparing definition export.');
       fs.writeFileSync(loc, writeData, 'utf8', (err) => {
