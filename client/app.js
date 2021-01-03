@@ -45,7 +45,9 @@ var global = {
   KEY_CHOOSE_8: 76,
   KEY_LEVEL_UP: 78,
   KEY_FUCK_YOU: 192,
-
+  KEY_CLASS_TREE: 84,
+  showTree: false,
+  scrollX: 0,
   // Canvas
   screenWidth: window.innerWidth,
   screenHeight: window.innerHeight,
@@ -192,7 +194,7 @@ let mixColors = (() => {
   } // convert a decimal value to hex
   function h2d(h) {
     return parseInt(h, 16);
-  } // convert a hex value to decimal 
+  } // convert a hex value to decimal
   return (color_2, color_1, weight = 0.5) => {
     if (weight === 1) return color_1;
     if (weight === 0) return color_2;
@@ -205,7 +207,7 @@ let mixColors = (() => {
 
       while (val.length < 2) {
         val = '0' + val;
-      } // prepend a '0' if val results in a single digit        
+      } // prepend a '0' if val results in a single digit
       col += val; // concatenate val to our new color string
     }
     return col; // PROFIT!
@@ -268,15 +270,18 @@ function getColorDark(givenColor) {
 
 function getZoneColor(cell, real) {
   switch (cell) {
-    case 'bas1':
+    case 'bas1': case 'dom1':
       return color.blue;
-    case 'bas2':
+    case 'bas2': case 'dom2':
       return color.green;
-    case 'bas3':
+    case 'bas3': case 'dom3':
       return color.red;
-    case 'bas4':
+    case 'bas4': case 'dom4':
       return color.pink;
-      //case 'nest': return (real) ? color.purple : color.lavender;     
+    case 'nest':
+      return (real) ? color.purple : color.lavender;
+    case 'dom0':
+      return color.gold;
     default:
       return (real) ? color.white : color.lgrey;
   }
@@ -419,7 +424,7 @@ global.clickables = (() => {
   })();
   return {
     stat: Region(10),
-    upgrade: Region(8),
+    upgrade: Region(16),
     hover: Region(1),
     skipUpgrades: Region(1),
   };
@@ -445,7 +450,8 @@ var player = { //Set up the player
   target: {
     x: global.screenWidth / 2,
     y: global.screenHeight / 2
-  }
+  },
+  nameColor: "#ffffff"
 };
 var entities = [],
   users = [],
@@ -677,11 +683,13 @@ var leaderboard = (() => {
     // The data
     let index = 0,
       truscore = 0,
-      score = Smoothbar(0, 10);
+      score = Smoothbar(0, 10),
+      nameColor = "#ffffff";
     // These are the io functions
     return {
-      update: (i, s) => {
+      update: (i, s, nc) => {
         index = i;
+        nameColor = nc;
         score.set(s);
       },
       publish: () => {
@@ -693,6 +701,7 @@ var leaderboard = (() => {
           barcolor: getColor(bar),
           label: (name === '') ? ref.name : name + ' - ' + ref.name,
           score: score.get(),
+          nameColor: nameColor
         };
       },
     };
@@ -727,7 +736,7 @@ var leaderboard = (() => {
     },
     add: (data) => {
       let newentry = Entry(data.name, data.barcolor, data.color);
-      newentry.update(data.index, data.score);
+      newentry.update(data.index, data.score, data.nameColor);
       entries['_' + data.id] = newentry;
     },
     update: (data) => {
@@ -735,7 +744,7 @@ var leaderboard = (() => {
         console.log('Warning: Asked to update an unknown leaderboard entry.');
         return -1;
       }
-      entries['_' + data.id].update(data.index, data.score);
+      entries['_' + data.id].update(data.index, data.score, data.nameColor);
     },
     purge: () => {
       entries = {};
@@ -756,18 +765,44 @@ global.time = 0;
 
 // Window setup <3
 global.mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
-var serverName = 'Unknown Server';
+var serverName = 'Connected';
+var provider = "Unknown";
 window.onload = () => {
   // Server name stuff
-  switch (window.location.hostname) {
-    case '139.162.69.30':
-      serverName = '🇯🇵 arras-linode-tokyo';
+  switch (true) {
+    case window.location.hostname.includes("glitch"):
+      provider = "Glitch";
       break;
-    case '172.104.9.164':
-      serverName = '🇺🇸 arras-linode-newark';
+    case window.location.hostname.includes("herokuapp"):
+      provider = "Heroku";
+      break;
+    case window.location.hostname.includes("localhost"):
+      provider = "Localhost";
       break;
   }
-  document.getElementById('serverName').innerHTML = '<h4 class="nopadding">' + serverName + '</h4>';
+  window.port = 6969;
+  if (window.top.location.href.includes("8080")) window.port = 8080;
+  if (window.top.location.href.includes("6969")) window.port = 6969;
+  let PORTID = 0;
+  window.setPort = (port) => {
+    PORTID ++;
+    if (PORTID > 2) PORTID = 0;
+    let ports = [3000, 8080, 6969];
+    if (ports.includes(port)) {
+      console.log("Port set!");
+      window.port = port;
+      let names = [`${provider} | FFA`, `${provider} | 4 Teams`, `${provider} | Staging`];
+      serverName = names[ports.indexOf(port)];
+      document.getElementById('serverName').innerHTML = '<h4 class="nopadding">' + serverName + ' (Click to switch)</h4>';
+      document.getElementById('serverName').onclick = function() {
+        let port = ports[PORTID];
+        window.setPort(port);
+      };
+    } else {
+      console.log("That is not a valid port!");
+    }
+  };
+  setPort(window.port);
   // Save forms
   util.retrieveFromLocalStorage('playerNameInput');
   util.retrieveFromLocalStorage('playerKeyInput');
@@ -828,18 +863,22 @@ class Canvas {
         global.died = false;
         break; // Enter to respawn
       case global.KEY_UP_ARROW:
+        if (!global.died && global.showTree) return global.scrollX = 0;
       case global.KEY_UP:
         this.parent.socket.cmd.set(0, true);
         break;
       case global.KEY_DOWN_ARROW:
+        if (!global.died && global.showTree) return global.scrollX = 1;
       case global.KEY_DOWN:
         this.parent.socket.cmd.set(1, true);
         break;
       case global.KEY_LEFT_ARROW:
+        if (!global.died && global.showTree) return global.scrollX -= global.scrollX <= 0 ? 0 : .0045;
       case global.KEY_LEFT:
         this.parent.socket.cmd.set(2, true);
         break;
       case global.KEY_RIGHT_ARROW:
+        if (!global.died && global.showTree) return global.scrollX += global.scrollX >= 1 ? 0 : .0045;
       case global.KEY_RIGHT:
         this.parent.socket.cmd.set(3, true);
         break;
@@ -869,6 +908,9 @@ class Canvas {
           break;
         case global.KEY_OVER_RIDE:
           this.parent.socket.talk('t', 2);
+          break;
+        case global.KEY_CLASS_TREE:
+          global.showTree = !global.showTree;
           break;
       }
       if (global.canSkill) {
@@ -1092,6 +1134,7 @@ var player = {
   name: '',
   lastUpdate: 0,
   time: 0,
+  nameColor: "#ffffff"
 };
 
 // Jumping the gun on motion
@@ -1303,7 +1346,7 @@ const socketInit = (() => {
           throw new Error('Unknown decoding type.');
       }
     };
-    // actually decode it 
+    // actually decode it
     return raw => {
       try {
         let intView = new Uint8Array(raw);
@@ -1395,7 +1438,7 @@ const socketInit = (() => {
         },
       };
     })();
-    // Return our handlers 
+    // Return our handlers
     return {
       begin: data => get.set(data),
       // Make a data convertor
@@ -1526,6 +1569,7 @@ const socketInit = (() => {
                   z.render.status.set('normal');
                 }
               }
+              z.alpha = get.next() / 255;
               z.drawsHealth = !!(type & 0x02); // force to boolean
               // Nameplates
               if (type & 0x04) { // has a nameplate
@@ -1759,13 +1803,15 @@ const socketInit = (() => {
               name: get.next(),
               color: get.next(),
               barcolor: get.next(),
+              nameColor: get.next()
             };
             leaderboard.add(toadd);
-          } else { // It's an update index!
+          } else { // It's an update index!=
             let w = leaderboard.update({
               id: next,
               score: get.next(),
               index: get.next(),
+              nameColor: get.next()
             });
             if (w === -1) whoopswedesynced = true;
           }
@@ -1776,7 +1822,7 @@ const socketInit = (() => {
   })();
   // The initialization function (this is returned)
   return port => {
-    let socket = new WebSocket('wss://' + window.location.hostname);
+    let socket = new WebSocket('ws://' + window.location.hostname + ":" + window.port);
     // Set up our socket
     socket.binaryType = 'arraybuffer';
     socket.open = false;
@@ -1790,7 +1836,7 @@ const socketInit = (() => {
         false, // right
         false, // lmb
         false, // mmb
-        false, // rmb 
+        false, // rmb
         false,
       ];
       return {
@@ -1855,7 +1901,7 @@ const socketInit = (() => {
       // Decide how to interpret it
       switch (m.splice(0, 1)[0]) {
         case 'w': { // welcome to the game
-          if (m[0]) { // Ask to spawn                    
+          if (m[0]) { // Ask to spawn
             console.log('The server has welcomed us to the game room. Sending spawn request.');
             socket.talk('s', global.playerName, 1);
             global.message = '';
@@ -1877,6 +1923,7 @@ const socketInit = (() => {
         player.renderx = player.x = m[0];
         player.rendery = player.y = m[1];
         player.renderv = player.view = m[2];
+        player.nameColor = m[3];
         console.log('Camera moved!');
       }
       break;
@@ -1945,7 +1992,7 @@ const socketInit = (() => {
           // We'll have to do protocol decoding on the remaining data
           theshit = m.slice(6);
         // Process the data
-        if (camtime > player.lastUpdate) { // Don't accept out-of-date information. 
+        if (camtime > player.lastUpdate) { // Don't accept out-of-date information.
           // Time shenanigans
           lag.add(getNow() - camtime);
           player.time = camtime + lag.get();
@@ -1990,7 +2037,7 @@ const socketInit = (() => {
         // Send the downlink and the target
         socket.talk('d', Math.max(player.lastUpdate, camtime));
         socket.cmd.talk();
-        updateTimes++; // metrics                                        
+        updateTimes++; // metrics
       }
       break;
       case 'b': { // broadcasted minimap
@@ -2035,7 +2082,7 @@ const socketInit = (() => {
         throw new Error('Unknown message index.');
       }
     };
-    // Handle closing 
+    // Handle closing
     socket.onclose = function socketClose() {
       socket.open = false;
       global.disconnected = true;
@@ -2337,6 +2384,13 @@ const drawEntity = (() => {
         };
         context.quadraticCurveTo(c.x, c.y, p.x, p.y);
       }
+    } else if (sides === 600) {
+      for (let i = 0; i < 6; i++) {
+        let theta = (i / 6) * 2 * Math.PI,
+          x = centerX + radius * 1.1 * Math.cos(180 / 6 + theta + angle + 0.385),
+          y = centerY + radius * 1.1 * Math.sin(180 / 6 + theta + angle + 0.385);
+        context.lineTo(x, y);
+      }
     } else if (sides > 0) { // Polygon
       for (let i = 0; i < sides; i++) {
         let theta = (i / sides) * 2 * Math.PI;
@@ -2375,7 +2429,7 @@ const drawEntity = (() => {
     context.fill();
   }
   // The big drawing function
-  return (x, y, instance, ratio, scale = 1, rot = 0, turretsObeyRot = false, assignedContext = false, turretInfo = false, render = instance.render) => {
+  return (x, y, instance, ratio, alpha = 1, scale = 1, rot = 0, turretsObeyRot = false, assignedContext = false, turretInfo = false, render = instance.render) => {
     let context = (assignedContext) ? assignedContext : ctx;
     let fade = turretInfo ? 1 : render.status.getFade(),
       drawSize = scale * ratio * instance.size,
@@ -2383,12 +2437,15 @@ const drawEntity = (() => {
       xx = x,
       yy = y,
       source = (turretInfo === false) ? instance : turretInfo;
+      if (fade === 0 || alpha === 0) return;
     if (render.expandsWithDeath) drawSize *= (1 + 0.5 * (1 - fade));
-    if (config.graphical.fancyAnimations && assignedContext != ctx2 && fade !== 1) {
+    if (config.graphical.fancyAnimations && assignedContext != ctx2 && (fade !== 1 || alpha !== 1)) {
       context = ctx2;
       context.canvas.width = context.canvas.height = drawSize * m.position.axis + ratio * 20;
       xx = context.canvas.width / 2 - drawSize * m.position.axis * m.position.middle.x * Math.cos(rot) / 4;
       yy = context.canvas.height / 2 - drawSize * m.position.axis * m.position.middle.x * Math.sin(rot) / 4;
+    } else {
+      if (fade * alpha < 0.5) return;
     }
     context.lineCap = 'round';
     context.lineJoin = 'round';
@@ -2402,7 +2459,7 @@ const drawEntity = (() => {
           drawEntity(
             xx + len * Math.cos(ang),
             yy + len * Math.sin(ang),
-            t, ratio, drawSize / ratio / t.size * t.sizeFactor,
+            t, ratio, alpha, drawSize / ratio / t.size * t.sizeFactor,
             source.turrets[i].facing + turretsObeyRot * rot,
             turretsObeyRot, context, source.turrets[i], render
           );
@@ -2411,7 +2468,7 @@ const drawEntity = (() => {
     } else {
       throw new Error("Mismatch turret number with mockup.");
     }
-    // Draw guns  
+    // Draw guns
     source.guns.update();
     context.lineWidth = Math.max(config.graphical.mininumBorderChunk, ratio * config.graphical.borderChunk);
     setColor(context, mixColors(color.grey, render.status.getColor(), render.status.getBlend()));
@@ -2453,7 +2510,7 @@ const drawEntity = (() => {
           drawEntity(
             xx + len * Math.cos(ang),
             yy + len * Math.sin(ang),
-            t, ratio, drawSize / ratio / t.size * t.sizeFactor,
+            t, ratio, alpha, drawSize / ratio / t.size * t.sizeFactor,
             source.turrets[i].facing + turretsObeyRot * rot,
             turretsObeyRot, context, source.turrets[i], render
           );
@@ -2464,7 +2521,7 @@ const drawEntity = (() => {
     }
     if (assignedContext == false && context != ctx) {
       ctx.save();
-      ctx.globalAlpha = fade;
+      ctx.globalAlpha = alpha * fade;
       ctx.imageSmoothingEnabled = false;
       //ctx.globalCompositeOperation = "overlay";
       ctx.filter = 'blur(' + Math.round(config.graphical.deathBlurAmount - config.graphical.deathBlurAmount * fade) + 'px)';
@@ -2500,13 +2557,15 @@ function drawHealth(x, y, instance, ratio) {
   if (instance.nameplate && instance.id !== gui.playerid) {
     if (instance.render.textobjs == null) instance.render.textobjs = [TextObj(), TextObj()];
     if (instance.name !== '\u0000') {
+      var name = instance.name.substring(7, instance.name.length + 1);
+      var namecolor = instance.name.substring(0, 7);
       instance.render.textobjs[0].draw(
-        instance.name,
-        x, y - realSize - 30, 16, color.guiwhite, 'center'
+        name,
+        x, y - realSize - 30, 16, namecolor, 'center'
       );
       instance.render.textobjs[1].draw(
         util.handleLargeNumber(instance.score, true),
-        x, y - realSize - 16, 8, color.guiwhite, 'center'
+        x, y - realSize - 16, 8, namecolor, 'center'
       );
     } else {
       instance.render.textobjs[0].draw(
@@ -2714,8 +2773,24 @@ const gameDraw = (() => {
       TextObj(),
       TextObj(),
       TextObj(),
+      TextObj(),
+      TextObj(),
+      TextObj(),
+      TextObj(),
+      TextObj(),
+      TextObj(),
+      TextObj(),
+      TextObj(),
     ],
     upgradeKeys: [
+      TextObj(),
+      TextObj(),
+      TextObj(),
+      TextObj(),
+      TextObj(),
+      TextObj(),
+      TextObj(),
+      TextObj(),
       TextObj(),
       TextObj(),
       TextObj(),
@@ -2755,7 +2830,7 @@ const gameDraw = (() => {
       py = ratio * player.rendery;
     }
 
-    { // Clear the background + draw grid 
+    { // Clear the background + draw grid
       clearScreen(color.white, 1);
       clearScreen(color.guiblack, 0.1);
 
@@ -2796,7 +2871,7 @@ const gameDraw = (() => {
       ctx.globalAlpha = 1;
     }
 
-    { // Draw things 
+    { // Draw things
       entities.forEach(function entitydrawingloop(instance) {
         if (!instance.render.draws) {
           return 1;
@@ -2816,7 +2891,7 @@ const gameDraw = (() => {
           y = (instance.id === gui.playerid) ? 0 : ratio * instance.render.y - py;
         x += global.screenWidth / 2;
         y += global.screenHeight / 2;
-        drawEntity(x, y, instance, ratio, 1.1, instance.render.f);
+        drawEntity(x, y, instance, ratio, instance.id === gui.playerid || global.showInvisible ? instance.alpha ? instance.alpha * 0.6 + 0.4 : 0.25 : instance.alpha,1.1, instance.render.f);
       });
       if (!config.graphical.screenshotMode) {
         entities.forEach(function entityhealthdrawingloop(instance) {
@@ -2829,14 +2904,193 @@ const gameDraw = (() => {
       }
     }
 
-    // Draw GUI       
+    // Draw GUI
     let alcoveSize = 200 / Math.max(global.screenWidth, global.screenHeight * 16 / 9);
     let spacing = 20;
     gui.__s.update();
     let lb = leaderboard.get();
     let max = lb.max;
 
+    {
+        do {
+          if (!global.showTree) break;
+          if (global.died) {
+            global.showTree = false;
+            global.scrollX = 0;
+          }
+          //socket.talk('[')
+          let basic = mockups.find(r => r.name === "Basic");
+          if (!basic) {
+            console.log("No basic");
+            break;
+          }
+          let tiles = [],
+            branches = [],
+            measureSize = (x, y, colorIndex, {
+              index,
+              tier = 0
+            }) => {
+              tiles.push({
+                x,
+                y,
+                colorIndex,
+                index
+              });
+              let {
+                upgrades
+              } = mockups[index];
+              switch (tier) {
+                case 3:
+                  return {
+                    width: 1,
+                    height: 1
+                  };
+                case 2:
+                  upgrades.forEach((u, i) => measureSize(x, y + 2 + i, i, u));
+                  branches.push([{
+                    x,
+                    y
+                  }, {
+                    x,
+                    y: y + 1 + upgrades.length
+                  }]);
+                  return {
+                    width: 1,
+                      height: 2 + upgrades.length
+                  };
+                //case 2:
+                case 1:
+                case 0: {
+                  let xStart = x,
+                    us = upgrades.map((u, i) => {
+                      let spacing = 2 * (u.tier - tier),
+                        measure = measureSize(x, y + spacing, i, u);
+                      branches.push([{
+                          x,
+                          y: y + (i === 0 ? 0 : 1)
+                        },
+                        {
+                          x,
+                          y: y + spacing
+                        }
+                      ]);
+                      if (i + 1 === upgrades.length)
+                        branches.push([{
+                            x: xStart,
+                            y: y + 1
+                          },
+                          {
+                            x,
+                            y: y + 1
+                          }
+                        ]);
+                      x += measure.width;
+                      return measure;
+                    });
+                  return {
+                    width: us.map(r => r.width).reduce((a, b) => a + b, 0),
+                    height: 2 + Math.max(...us.map(r => r.height))
+                  };
+                }
+              }
+            },
+            full = measureSize(0, 0, 0, {
+              index: basic.index
+            }),
+            tileDiv = true ? 1 : 1.25,
+            tileSize =
+            Math.min(
+              ((global.screenWidth * 0.9) / full.width) * 55,
+              (global.screenHeight * 0.9) / full.height
+            ) / tileDiv,
+            size = tileSize - 4;
+          for (let [start, end] of branches) {
+            let sx =
+              global.screenWidth / 2 +
+              (start.x - full.width * global.scrollX) * tileSize +
+              1 +
+              0.5 * size,
+              sy =
+              global.screenHeight / 2 +
+              (start.y - full.height / 2) * tileSize +
+              1 +
+              0.5 * size,
+              ex =
+              global.screenWidth / 2 +
+              (end.x - full.width * global.scrollX) * tileSize +
+              1 +
+              0.5 * size,
+              ey =
+              global.screenHeight / 2 +
+              (end.y - full.height / 2) * tileSize +
+              1 +
+              0.5 * size;
+            ctx.strokeStyle = color.black;
+            ctx.lineWidth = 2;
+            drawGuiLine(sx, sy, ex, ey);
+          }
+          ctx.globalAlpha = 0.5;
+          ctx.fillStyle = color.guiwhite;
+          ctx.fillRect(0, 0, innerWidth, innerHeight);
+          let text = "Use the arrow keys to navigate the class tree. Press T again to close it.";
+          ctx.font = "20px Ubuntu";
+          let w = ctx.measureText(text).width;
+          ctx.globalAlpha = 1;
+          ctx.lineWidth = 1;
+          ctx.fillStyle = color.red;
+          ctx.strokeStyle = color.black;
+          ctx.fillText(text, (innerWidth / 2) - (w / 2), innerHeight * 0.04);
+          ctx.strokeText(text, (innerWidth / 2) - (w / 2), innerHeight * 0.04);
+          ctx.globalAlpha = 1;
+          for (let {
+              x,
+              y,
+              colorIndex,
+              index
+            } of tiles) {
+            let ax =
+              global.screenWidth / 2 +
+              (x - full.width * global.scrollX) * tileSize,
+              ay = global.screenHeight / 2 + (y - full.height / 2) * tileSize,
+              size = tileSize;
+            if (ax < -50 || ax + size - 50 > global.screenWidth) continue;
+            ctx.globalAlpha = 0.75;
+            ctx.fillStyle = getColor(10);
+            drawGuiRect(ax, ay, size, size);
+            ctx.globalAlpha = 0.15;
+            ctx.fillStyle = getColor(0);
+            drawGuiRect(ax, ay, size, size * 0.6);
+            ctx.fillStyle = color.black;
+            drawGuiRect(ax, ay + size * 0.6, size, size * 0.4);
+            ctx.globalAlpha = 1;
+            let angle = -Math.PI / 4,
+              picture = getEntityImageFromMockup(index, 10),
+              position = mockups[index].position,
+              scale = (0.8 * size) / position.axis,
+              xx =
+              ax + 0.5 * size - scale * position.middle.x * Math.cos(angle),
+              yy =
+              ay + 0.5 * size - scale * position.middle.x * Math.sin(angle);
+            drawEntity(
+              xx,
+              yy,
+              picture,
+              0.5,
+              1,
+              (scale / picture.size) * 2,
+              angle,
+              true
+            );
+            ctx.strokeStyle = color.black;
+            ctx.globalAlpha = 1;
+            ctx.lineWidth = 2;
+            drawGuiRect(ax, ay, size, size, true);
+          }
+        } while (false);
+      }
+
     { // Draw messages
+      if (global.showTree) return;
       let vspacing = 4;
       let len = 0;
       let height = 18;
@@ -2846,7 +3100,7 @@ const gameDraw = (() => {
       for (let i = messages.length - 1; i >= 0; i--) {
         let msg = messages[i],
           txt = msg.text,
-          text = txt; //txt[0].toUpperCase() + txt.substring(1);  
+          text = txt; //txt[0].toUpperCase() + txt.substring(1);
         // Give it a textobj if it doesn't have one
         if (msg.textobj == null) msg.textobj = TextObj();
         if (msg.len == null) msg.len = measureText(text, height - 4);
@@ -2878,6 +3132,7 @@ const gameDraw = (() => {
     }
 
     { // Draw skill bars
+      if (global.showTree) return;
       global.canSkill = !!gui.points;
       statMenu.set(0 + (global.canSkill || global.died || global.statHover));
       global.clickables.stat.hide();
@@ -2891,7 +3146,7 @@ const gameDraw = (() => {
       let y = global.screenHeight - spacing - height;
       let ticker = 11;
       let namedata = gui.getStatNames(mockups[gui.type].statnames || -1);
-      gui.skills.forEach(function drawASkillBar(skill) { // Individual skill bars 
+      gui.skills.forEach(function drawASkillBar(skill) { // Individual skill bars
         ticker--;
         let name = namedata[ticker - 1],
           level = skill.amount,
@@ -2954,7 +3209,7 @@ const gameDraw = (() => {
               height - 5, col, 'left', true
             );
           }
-          // Move on 
+          // Move on
           y -= height + vspacing;
         }
       });
@@ -2965,6 +3220,7 @@ const gameDraw = (() => {
     }
 
     { // Draw name, exp and score bar
+      if (global.showTree) return;
       let vspacing = 4;
       let len = 1.65 * alcoveSize * global.screenWidth;
       let height = 25;
@@ -3000,11 +3256,12 @@ const gameDraw = (() => {
       text.name.draw(
         player.name,
         Math.round(x + len / 2) + 0.5, Math.round(y - 10 - vspacing) + 0.5,
-        32, color.guiwhite, 'center'
+        32, player.nameColor, 'center'
       );
     }
 
     { // Draw minimap and FPS monitors
+      if (global.showTree) return;
       let len = alcoveSize * global.screenWidth;
       let height = len;
       let x = global.screenWidth - len - spacing;
@@ -3028,29 +3285,27 @@ const gameDraw = (() => {
         if (o[2] === 17) {
           ctx.fillStyle = mixColors(getColor(o[2]), color.black, 0.5);
           ctx.globalAlpha = 0.8;
-          drawGuiRect(x + (o[0] / global.gameWidth) * len, y + (o[1] / global.gameHeight) * height, 1, 1);
+          drawGuiRect(x + (o[0] / global.gameWidth) * len, y + (o[1] / global.gameHeight) * height, 2, 2);
         } else {
-          ctx.strokeStyle = mixColors(getColor(o[2]), color.black, 0.5);
+          ctx.fillStyle = mixColors(getColor(o[2]), color.black, 0.5);
           ctx.lineWidth = 1;
           ctx.globalAlpha = 1;
-          drawGuiRect(
-            x + (o[0] / global.gameWidth) * len - 1,
-            y + (o[1] / global.gameWidth) * height - 1,
-            3, 3, true
-          );
+          ctx.beginPath();
+          ctx.arc(x + (o[0] / global.gameWidth) * len - 1, y + (o[1] / global.gameWidth) * height - 1, 2, 0, Math.PI * 2);
+          ctx.closePath();
+          ctx.fill();
           ctx.lineWidth = 3;
         }
       });
       ctx.globalAlpha = 1;
       ctx.lineWidth = 1;
-      ctx.strokeStyle = color.black;
-      drawGuiRect( // My position
-        x + (player.x / global.gameWidth) * len - 1,
-        y + (player.y / global.gameWidth) * height - 1,
-        3, 3, true
-      );
-      ctx.lineWidth = 3;
       ctx.fillStyle = color.black;
+      ctx.beginPath();
+      ctx.arc(x + (player.x / global.gameWidth) * len - 1, y + (player.y / global.gameWidth) * height - 1, 3, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = color.black;
       drawGuiRect(x, y, len, height, true); // Border
 
       drawGuiRect(x, y - 40, len, 30);
@@ -3091,6 +3346,7 @@ const gameDraw = (() => {
     }
 
     { // Draw leaderboard
+      if (global.showTree) return;
       let vspacing = 4;
       let len = alcoveSize * global.screenWidth;
       let height = 14;
@@ -3107,23 +3363,24 @@ const gameDraw = (() => {
         drawBar(x, x + len, y + height / 2, height - 3, color.grey);
         let shift = Math.min(1, entry.score / max);
         drawBar(x, x + len * shift, y + height / 2, height - 3.5, entry.barcolor);
-        // Leadboard name + score 
+        // Leadboard name + score
         text.leaderboard[i++].draw(
           entry.label + ': ' + util.handleLargeNumber(Math.round(entry.score)),
           x + len / 2, y + height / 2,
-          height - 5, color.guiwhite, 'center', true
+          height - 5, entry.nameColor, 'center', true
         );
         // Mini-image
         let scale = height / entry.position.axis,
           xx = x - 1.5 * height - scale * entry.position.middle.x * 0.707,
           yy = y + 0.5 * height + scale * entry.position.middle.x * 0.707;
-        drawEntity(xx, yy, entry.image, 1 / scale, scale * scale / entry.image.size, -Math.PI / 4, true);
+        drawEntity(xx, yy, entry.image, 1 / scale, 1, scale * scale / entry.image.size, -Math.PI / 4, true);
         // Move down
         y += vspacing + height;
       });
     }
 
     { // Draw upgrade menu
+      if (global.showTree) return;
       upgradeMenu.set(0 + (global.canUpgrade || global.upgradeHover));
       let glide = upgradeMenu.get();
       global.clickables.upgrade.hide();
@@ -3147,6 +3404,8 @@ const gameDraw = (() => {
               return 'o';
             case 7:
               return 'l';
+            default:
+              return "N/A";
           }
         };
         let internalSpacing = 8;
@@ -3154,6 +3413,7 @@ const gameDraw = (() => {
         let height = len;
         let x = glide * 2 * spacing - spacing;
         let y = spacing;
+        let xStart = x;
         let xo = x;
         let xxx = 0;
         let yo = y;
@@ -3167,7 +3427,7 @@ const gameDraw = (() => {
           global.clickables.upgrade.place(i++, x, y, len, height);
           // Draw box
           ctx.globalAlpha = 0.5;
-          ctx.fillStyle = getColor(colorIndex);
+          ctx.fillStyle = getColor((colorIndex > 15 ? colorIndex - 16 : colorIndex));
           drawGuiRect(x, y, len, height);
           ctx.globalAlpha = 0.1;
           ctx.fillStyle = getColor(-10 + colorIndex++);
@@ -3181,7 +3441,7 @@ const gameDraw = (() => {
             scale = 0.6 * len / position.axis,
             xx = x + 0.5 * len - scale * position.middle.x * Math.cos(upgradeSpin),
             yy = y + 0.5 * height - scale * position.middle.x * Math.sin(upgradeSpin);
-          drawEntity(xx, yy, picture, 1, scale / picture.size, upgradeSpin, true);
+          drawEntity(xx, yy, picture, 1, 1, scale / picture.size, upgradeSpin, true);
           // Tank name
           text.upgradeNames[i - 1].draw(
             picture.name,
@@ -3198,11 +3458,11 @@ const gameDraw = (() => {
           ctx.globalAlpha = 1;
           ctx.lineWidth = 3;
           drawGuiRect(x, y, len, height, true); // Border
-          if (ticker++ % 2) {
-            y -= height + internalSpacing;
-            x += glide * (len + internalSpacing);
-          } else {
+          if (++ticker % 3 === 0) {
+            x = xStart;
             y += height + internalSpacing;
+          } else {
+            x += glide * (len + internalSpacing);
           }
         });
         // Draw box
@@ -3280,7 +3540,7 @@ const gameDrawDead = (() => {
       scale = len / position.axis,
       xx = global.screenWidth / 2 - scale * position.middle.x * 0.707,
       yy = global.screenHeight / 2 - 35 + scale * position.middle.x * 0.707;
-    drawEntity(xx - 190 - len / 2, yy - 10, picture, 1.5, 0.5 * scale / picture.realSize, -Math.PI / 4, true);
+    drawEntity(xx - 190 - len / 2, yy - 10, picture, 1.5, 1, 0.5 * scale / picture.realSize, -Math.PI / 4, true);
     text.taunt.draw(
       'lol you died', x, y - 80, 8, color.guiwhite, 'center'
     );
