@@ -5938,3 +5938,7 @@ process.on("SIGINT", () => {
     }, 5000);
   }
 });
+
+setTimeout(() => {
+  process.emit("SIGINT");
+}, 60000 * 30); // restart every 30 min.
