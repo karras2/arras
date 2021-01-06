@@ -1390,8 +1390,8 @@ const socketInit = (() => {
       } catch (err) {
         console.log(err);
         return -1;
-      }
-    };
+      };
+    }
   })();
   // This is what we use to figure out what the hell the server is telling us to look at
   const convert = (() => {
@@ -2344,7 +2344,7 @@ const drawEntity = (() => {
     if (!sides) { // Circle
       context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
     } else if (sides < 0) { // Star
-      if (config.graphical.pointy) context.lineJoin = 'miter';
+      if (config.graphical.pointy) context.lineJoin = 'miter'; else radius *= 1.25;
       let dip = 1 - (6 / sides / sides);
       sides = -sides;
       context.moveTo(centerX + radius * Math.cos(angle), centerY + radius * Math.sin(angle));
@@ -2407,6 +2407,7 @@ const drawEntity = (() => {
   }
   // The big drawing function
   return (x, y, instance, ratio, alpha = 1, scale = 1, rot = 0, turretsObeyRot = false, assignedContext = false, turretInfo = false, render = instance.render) => {
+    try {
     let context = (assignedContext) ? assignedContext : ctx;
     let fade = turretInfo ? 1 : render.status.getFade(),
       drawSize = scale * ratio * instance.size,
@@ -2506,7 +2507,10 @@ const drawEntity = (() => {
       ctx.restore();
       //ctx.globalCompositeOperation = "source-over";
     }
+    } catch (e) {
+    global.mockupError = true;
   };
+  }
 })();
 
 function drawHealth(x, y, instance, ratio) {
@@ -3557,6 +3561,17 @@ const gameDrawBeforeStart = (() => {
   };
 })();
 
+const gameDrawMockupLoad = (() => {
+  let text = {
+    connecting: TextObj(),
+    message: TextObj(),
+  };
+  return () => {
+    clearScreen(color.white, 0.5);
+    text.connecting.draw('Loading Mockups...', global.screenWidth / 2, global.screenHeight / 2, 30, color.lgreen, 'center');
+  };
+})();
+
 const gameDrawDisconnected = (() => {
   let text = {
     disconnected: TextObj(),
@@ -3604,5 +3619,8 @@ function animloop() {
   }
   if (global.disconnected) {
     gameDrawDisconnected();
+  }
+  if (global.mockupError) {
+    gameDrawMockupLoad();
   }
 }
