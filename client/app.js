@@ -300,66 +300,70 @@ var mockups = [];
 util.pullJSON('mockups').then(data => mockups = data);
 // Mockup functions
 function getEntityImageFromMockup(index, color = mockups[index].color) {
-  let mockup = mockups[index];
-  return {
-    time: 0,
-    index: index,
-    x: mockup.x,
-    y: mockup.y,
-    vx: 0,
-    vy: 0,
-    size: mockup.size,
-    realSize: mockup.realSize,
-    color: color,
-    render: {
-      status: {
-        getFade: () => {
-          return 1;
-        },
-        getColor: () => {
-          return '#FFFFFF';
-        },
-        getBlend: () => {
-          return 0;
-        },
-        health: {
-          get: () => {
+  try {
+    let mockup = mockups[index];
+    return {
+      time: 0,
+      index: index,
+      x: mockup.x,
+      y: mockup.y,
+      vx: 0,
+      vy: 0,
+      size: mockup.size,
+      realSize: mockup.realSize,
+      color: color,
+      render: {
+        status: {
+          getFade: () => {
             return 1;
           },
-        },
-        shield: {
-          get: () => {
-            return 1;
+          getColor: () => {
+            return '#FFFFFF';
+          },
+          getBlend: () => {
+            return 0;
+          },
+          health: {
+            get: () => {
+              return 1;
+            },
+          },
+          shield: {
+            get: () => {
+              return 1;
+            },
           },
         },
       },
-    },
-    facing: mockup.facing,
-    shape: mockup.shape,
-    name: mockup.name,
-    score: 0,
-    tiggle: 0,
-    layer: mockup.layer,
-    guns: {
-      length: mockup.guns.length,
-      getPositions: () => {
-        let a = [];
-        mockup.guns.forEach(() => a.push(0));
-        return a;
+      facing: mockup.facing,
+      shape: mockup.shape,
+      name: mockup.name,
+      score: 0,
+      tiggle: 0,
+      layer: mockup.layer,
+      guns: {
+        length: mockup.guns.length,
+        getPositions: () => {
+          let a = [];
+          mockup.guns.forEach(() => a.push(0));
+          return a;
+        },
+        update: () => {},
       },
-      update: () => {},
-    },
-    turrets: mockup.turrets.map((t) => {
-      let o = getEntityImageFromMockup(t.index);
-      o.realSize = o.realSize / o.size * mockup.size * t.sizeFactor;
-      o.size = mockup.size * t.sizeFactor;
-      o.angle = t.angle;
-      o.offset = t.offset;
-      o.direction = t.direction;
-      o.facing = t.direction + t.angle;
-      return o;
-    }),
-  };
+      turrets: mockup.turrets.map((t) => {
+        let o = getEntityImageFromMockup(t.index);
+        o.realSize = o.realSize / o.size * mockup.size * t.sizeFactor;
+        o.size = mockup.size * t.sizeFactor;
+        o.angle = t.angle;
+        o.offset = t.offset;
+        o.direction = t.direction;
+        o.facing = t.direction + t.angle;
+        return o;
+      }),
+    };
+  } catch (e) {
+    global.mockupError = true;
+  }
 }
 
 // Define clickable regions
@@ -3628,6 +3632,7 @@ function animloop() {
   if (global.mockupError) {
     gameDrawMockupLoad();
   }
+  global.mockupError = false;
 }
 
 
