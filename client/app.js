@@ -2344,7 +2344,8 @@ const drawEntity = (() => {
     if (!sides) { // Circle
       context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
     } else if (sides < 0) { // Star
-      if (config.graphical.pointy) context.lineJoin = 'miter'; else radius *= 1.25;
+      if (config.graphical.pointy) context.lineJoin = 'miter';
+      else radius *= 1.25;
       let dip = 1 - (6 / sides / sides);
       sides = -sides;
       context.moveTo(centerX + radius * Math.cos(angle), centerY + radius * Math.sin(angle));
@@ -2408,157 +2409,161 @@ const drawEntity = (() => {
   // The big drawing function
   return (x, y, instance, ratio, alpha = 1, scale = 1, rot = 0, turretsObeyRot = false, assignedContext = false, turretInfo = false, render = instance.render) => {
     try {
-    let context = (assignedContext) ? assignedContext : ctx;
-    let fade = turretInfo ? 1 : render.status.getFade(),
-      drawSize = scale * ratio * instance.size,
-      m = mockups[instance.index],
-      xx = x,
-      yy = y,
-      source = (turretInfo === false) ? instance : turretInfo;
+      let context = (assignedContext) ? assignedContext : ctx;
+      let fade = turretInfo ? 1 : render.status.getFade(),
+        drawSize = scale * ratio * instance.size,
+        m = mockups[instance.index],
+        xx = x,
+        yy = y,
+        source = (turretInfo === false) ? instance : turretInfo;
       if (fade === 0 || alpha === 0) return;
-    if (render.expandsWithDeath) drawSize *= (1 + 0.5 * (1 - fade));
-    if (config.graphical.fancyAnimations && assignedContext != ctx2 && (fade !== 1 || alpha !== 1)) {
-      context = ctx2;
-      context.canvas.width = context.canvas.height = drawSize * m.position.axis + ratio * 20;
-      xx = context.canvas.width / 2 - drawSize * m.position.axis * m.position.middle.x * Math.cos(rot) / 4;
-      yy = context.canvas.height / 2 - drawSize * m.position.axis * m.position.middle.x * Math.sin(rot) / 4;
-    } else {
-      if (fade * alpha < 0.5) return;
-    }
-    context.lineCap = 'round';
-    context.lineJoin = 'round';
-    // Draw turrets beneath us
-    if (source.turrets.length === m.turrets.length) {
-      for (let i = 0; i < m.turrets.length; i++) {
-        let t = m.turrets[i];
-        if (t.layer === 0) {
-          let ang = t.direction + t.angle + rot,
-            len = t.offset * drawSize;
-          drawEntity(
-            xx + len * Math.cos(ang),
-            yy + len * Math.sin(ang),
-            t, ratio, alpha, drawSize / ratio / t.size * t.sizeFactor,
-            source.turrets[i].facing + turretsObeyRot * rot,
-            turretsObeyRot, context, source.turrets[i], render
+      if (render.expandsWithDeath) drawSize *= (1 + 0.5 * (1 - fade));
+      if (config.graphical.fancyAnimations && assignedContext != ctx2 && (fade !== 1 || alpha !== 1)) {
+        context = ctx2;
+        context.canvas.width = context.canvas.height = drawSize * m.position.axis + ratio * 20;
+        xx = context.canvas.width / 2 - drawSize * m.position.axis * m.position.middle.x * Math.cos(rot) / 4;
+        yy = context.canvas.height / 2 - drawSize * m.position.axis * m.position.middle.x * Math.sin(rot) / 4;
+      } else {
+        if (fade * alpha < 0.5) return;
+      }
+      context.lineCap = 'round';
+      context.lineJoin = 'round';
+      // Draw turrets beneath us
+      if (source.turrets.length === m.turrets.length) {
+        for (let i = 0; i < m.turrets.length; i++) {
+          let t = m.turrets[i];
+          if (t.layer === 0) {
+            let ang = t.direction + t.angle + rot,
+              len = t.offset * drawSize;
+            drawEntity(
+              xx + len * Math.cos(ang),
+              yy + len * Math.sin(ang),
+              t, ratio, alpha, drawSize / ratio / t.size * t.sizeFactor,
+              source.turrets[i].facing + turretsObeyRot * rot,
+              turretsObeyRot, context, source.turrets[i], render
+            );
+          }
+        }
+      } else {
+        throw new Error("Mismatch turret number with mockup.");
+      }
+      // Draw guns
+      source.guns.update();
+      context.lineWidth = Math.max(config.graphical.mininumBorderChunk, ratio * config.graphical.borderChunk);
+      setColor(context, mixColors(color.grey, render.status.getColor(), render.status.getBlend()));
+      if (source.guns.length === m.guns.length) {
+        let positions = source.guns.getPositions();
+        for (let i = 0; i < m.guns.length; i++) {
+          let g = m.guns[i],
+            position = positions[i] / ((g.aspect === 1) ? 2 : 1),
+            gx =
+            g.offset * Math.cos(g.direction + g.angle + rot) +
+            (g.length / 2 - position) * Math.cos(g.angle + rot),
+            gy =
+            g.offset * Math.sin(g.direction + g.angle + rot) +
+            (g.length / 2 - position) * Math.sin(g.angle + rot);
+          drawTrapezoid(
+            context,
+            xx + drawSize * gx,
+            yy + drawSize * gy,
+            drawSize * (g.length / 2 - ((g.aspect === 1) ? position * 2 : 0)),
+            drawSize * g.width / 2,
+            g.aspect,
+            g.angle + rot
           );
         }
+      } else {
+        throw new Error("Mismatch gun number with mockup.");
       }
-    } else {
-      throw new Error("Mismatch turret number with mockup.");
-    }
-    // Draw guns
-    source.guns.update();
-    context.lineWidth = Math.max(config.graphical.mininumBorderChunk, ratio * config.graphical.borderChunk);
-    setColor(context, mixColors(color.grey, render.status.getColor(), render.status.getBlend()));
-    if (source.guns.length === m.guns.length) {
-      let positions = source.guns.getPositions();
-      for (let i = 0; i < m.guns.length; i++) {
-        let g = m.guns[i],
-          position = positions[i] / ((g.aspect === 1) ? 2 : 1),
-          gx =
-          g.offset * Math.cos(g.direction + g.angle + rot) +
-          (g.length / 2 - position) * Math.cos(g.angle + rot),
-          gy =
-          g.offset * Math.sin(g.direction + g.angle + rot) +
-          (g.length / 2 - position) * Math.sin(g.angle + rot);
-        drawTrapezoid(
-          context,
-          xx + drawSize * gx,
-          yy + drawSize * gy,
-          drawSize * (g.length / 2 - ((g.aspect === 1) ? position * 2 : 0)),
-          drawSize * g.width / 2,
-          g.aspect,
-          g.angle + rot
-        );
-      }
-    } else {
-      throw new Error("Mismatch gun number with mockup.");
-    }
-    // Draw body
-    context.globalAlpha = 1;
-    setColor(context, mixColors(getColor(instance.color), render.status.getColor(), render.status.getBlend()));
-    drawPoly(context, xx, yy, drawSize / m.size * m.realSize, m.shape, rot);
-    // Draw turrets above us
-    if (source.turrets.length === m.turrets.length) {
-      for (let i = 0; i < m.turrets.length; i++) {
-        let t = m.turrets[i];
-        if (t.layer === 1) {
-          let ang = t.direction + t.angle + rot,
-            len = t.offset * drawSize;
-          drawEntity(
-            xx + len * Math.cos(ang),
-            yy + len * Math.sin(ang),
-            t, ratio, alpha, drawSize / ratio / t.size * t.sizeFactor,
-            source.turrets[i].facing + turretsObeyRot * rot,
-            turretsObeyRot, context, source.turrets[i], render
-          );
+      // Draw body
+      context.globalAlpha = 1;
+      setColor(context, mixColors(getColor(instance.color), render.status.getColor(), render.status.getBlend()));
+      drawPoly(context, xx, yy, drawSize / m.size * m.realSize, m.shape, rot);
+      // Draw turrets above us
+      if (source.turrets.length === m.turrets.length) {
+        for (let i = 0; i < m.turrets.length; i++) {
+          let t = m.turrets[i];
+          if (t.layer === 1) {
+            let ang = t.direction + t.angle + rot,
+              len = t.offset * drawSize;
+            drawEntity(
+              xx + len * Math.cos(ang),
+              yy + len * Math.sin(ang),
+              t, ratio, alpha, drawSize / ratio / t.size * t.sizeFactor,
+              source.turrets[i].facing + turretsObeyRot * rot,
+              turretsObeyRot, context, source.turrets[i], render
+            );
+          }
         }
+      } else {
+        throw new Error("Mismatch turret number with mockup.");
       }
-    } else {
-      throw new Error("Mismatch turret number with mockup.");
-    }
-    if (assignedContext == false && context != ctx) {
-      ctx.save();
-      ctx.globalAlpha = alpha * fade;
-      ctx.imageSmoothingEnabled = false;
-      //ctx.globalCompositeOperation = "overlay";
-      ctx.filter = 'blur(' + Math.round(config.graphical.deathBlurAmount - config.graphical.deathBlurAmount * fade) + 'px)';
-      ctx.drawImage(context.canvas, x - xx, y - yy);
-      ctx.restore();
-      //ctx.globalCompositeOperation = "source-over";
-    }
+      if (assignedContext == false && context != ctx) {
+        ctx.save();
+        ctx.globalAlpha = alpha * fade;
+        ctx.imageSmoothingEnabled = false;
+        //ctx.globalCompositeOperation = "overlay";
+        ctx.filter = 'blur(' + Math.round(config.graphical.deathBlurAmount - config.graphical.deathBlurAmount * fade) + 'px)';
+        ctx.drawImage(context.canvas, x - xx, y - yy);
+        ctx.restore();
+        //ctx.globalCompositeOperation = "source-over";
+      }
     } catch (e) {
-    global.mockupError = true;
-  };
+      global.mockupError = true;
+    };
   }
 })();
 
 function drawHealth(x, y, instance, ratio) {
-  // Draw health bar
-  ctx.globalAlpha = Math.pow(instance.render.status.getFade(), 2);
-  let size = instance.size * ratio;
-  let m = mockups[instance.index];
-  let realSize = size / m.size * m.realSize;
-  // Draw health
-  if (instance.drawsHealth) {
-    let health = instance.render.health.get();
-    let shield = instance.render.shield.get();
-    if (health < 1 || shield < 1) {
-      let yy = y + 1.1 * realSize + 15;
-      drawBar(x - size, x + size, yy, 3 + config.graphical.barChunk, color.black);
-      drawBar(x - size, x - size + 2 * size * health, yy, 3, color.lgreen);
-      if (shield) {
-        ctx.globalAlpha = 0.3 + shield * 0.3;
-        drawBar(x - size, x - size + 2 * size * shield, yy, 3, color.teal);
-        ctx.globalAlpha = 1;
+  try {
+    // Draw health bar
+    ctx.globalAlpha = Math.pow(instance.render.status.getFade(), 2);
+    let size = instance.size * ratio;
+    let m = mockups[instance.index];
+    let realSize = size / m.size * m.realSize;
+    // Draw health
+    if (instance.drawsHealth) {
+      let health = instance.render.health.get();
+      let shield = instance.render.shield.get();
+      if (health < 1 || shield < 1) {
+        let yy = y + 1.1 * realSize + 15;
+        drawBar(x - size, x + size, yy, 3 + config.graphical.barChunk, color.black);
+        drawBar(x - size, x - size + 2 * size * health, yy, 3, color.lgreen);
+        if (shield) {
+          ctx.globalAlpha = 0.3 + shield * 0.3;
+          drawBar(x - size, x - size + 2 * size * shield, yy, 3, color.teal);
+          ctx.globalAlpha = 1;
+        }
       }
     }
-  }
-  // Draw label
-  if (instance.nameplate && instance.id !== gui.playerid) {
-    if (instance.render.textobjs == null) instance.render.textobjs = [TextObj(), TextObj()];
-    if (instance.name !== '\u0000') {
-      var name = instance.name.substring(7, instance.name.length + 1);
-      var namecolor = instance.name.substring(0, 7);
-      instance.render.textobjs[0].draw(
-        name,
-        x, y - realSize - 30, 16, namecolor, 'center'
-      );
-      instance.render.textobjs[1].draw(
-        util.handleLargeNumber(instance.score, true),
-        x, y - realSize - 16, 8, namecolor, 'center'
-      );
-    } else {
-      instance.render.textobjs[0].draw(
-        'a spoopy 👻',
-        x, y - realSize - 30, 16, color.lavender, 'center'
-      );
-      instance.render.textobjs[1].draw(
-        util.handleLargeNumber(instance.score, true),
-        x, y - realSize - 16, 8, color.lavender, 'center'
-      );
+    // Draw label
+    if (instance.nameplate && instance.id !== gui.playerid) {
+      if (instance.render.textobjs == null) instance.render.textobjs = [TextObj(), TextObj()];
+      if (instance.name !== '\u0000') {
+        var name = instance.name.substring(7, instance.name.length + 1);
+        var namecolor = instance.name.substring(0, 7);
+        instance.render.textobjs[0].draw(
+          name,
+          x, y - realSize - 30, 16, namecolor, 'center'
+        );
+        instance.render.textobjs[1].draw(
+          util.handleLargeNumber(instance.score, true),
+          x, y - realSize - 16, 8, namecolor, 'center'
+        );
+      } else {
+        instance.render.textobjs[0].draw(
+          'a spoopy 👻',
+          x, y - realSize - 30, 16, color.lavender, 'center'
+        );
+        instance.render.textobjs[1].draw(
+          util.handleLargeNumber(instance.score, true),
+          x, y - realSize - 16, 8, color.lavender, 'center'
+        );
+      }
     }
-  }
+  } catch (e) {
+    global.mockupError = true;
+  };
 }
 
 // Start animation
@@ -2872,7 +2877,7 @@ const gameDraw = (() => {
           y = (instance.id === gui.playerid) ? 0 : ratio * instance.render.y - py;
         x += global.screenWidth / 2;
         y += global.screenHeight / 2;
-        drawEntity(x, y, instance, ratio, instance.id === gui.playerid || global.showInvisible ? instance.alpha ? instance.alpha * 0.6 + 0.4 : 0.25 : instance.alpha,1.1, instance.render.f);
+        drawEntity(x, y, instance, ratio, instance.id === gui.playerid || global.showInvisible ? instance.alpha ? instance.alpha * 0.6 + 0.4 : 0.25 : instance.alpha, 1.1, instance.render.f);
       });
       if (!config.graphical.screenshotMode) {
         entities.forEach(function entityhealthdrawingloop(instance) {
@@ -2893,182 +2898,182 @@ const gameDraw = (() => {
     let max = lb.max;
 
     {
-        do {
-          if (!global.showTree) break;
-          if (global.died) {
-            global.showTree = false;
-            global.scrollX = 0;
-          }
-          //socket.talk('[')
-          let basic = mockups.find(r => r.name === "Basic");
-          if (!basic) {
-            console.log("No basic");
-            break;
-          }
-          let tiles = [],
-            branches = [],
-            measureSize = (x, y, colorIndex, {
-              index,
-              tier = 0
-            }) => {
-              tiles.push({
-                x,
-                y,
-                colorIndex,
-                index
-              });
-              let {
-                upgrades
-              } = mockups[index];
-              switch (tier) {
-                case 3:
-                  return {
-                    width: 1,
-                    height: 1
-                  };
-                case 2:
-                  upgrades.forEach((u, i) => measureSize(x, y + 2 + i, i, u));
-                  branches.push([{
-                    x,
-                    y
-                  }, {
-                    x,
-                    y: y + 1 + upgrades.length
-                  }]);
-                  return {
-                    width: 1,
-                      height: 2 + upgrades.length
-                  };
-                //case 2:
-                case 1:
-                case 0: {
-                  let xStart = x,
-                    us = upgrades.map((u, i) => {
-                      let spacing = 2 * (u.tier - tier),
-                        measure = measureSize(x, y + spacing, i, u);
-                      branches.push([{
-                          x,
-                          y: y + (i === 0 ? 0 : 1)
-                        },
-                        {
-                          x,
-                          y: y + spacing
-                        }
-                      ]);
-                      if (i + 1 === upgrades.length)
-                        branches.push([{
-                            x: xStart,
-                            y: y + 1
-                          },
-                          {
-                            x,
-                            y: y + 1
-                          }
-                        ]);
-                      x += measure.width;
-                      return measure;
-                    });
-                  return {
-                    width: us.map(r => r.width).reduce((a, b) => a + b, 0),
-                    height: 2 + Math.max(...us.map(r => r.height))
-                  };
-                }
-              }
-            },
-            full = measureSize(0, 0, 0, {
-              index: basic.index
-            }),
-            tileDiv = true ? 1 : 1.25,
-            tileSize =
-            Math.min(
-              ((global.screenWidth * 0.9) / full.width) * 55,
-              (global.screenHeight * 0.9) / full.height
-            ) / tileDiv,
-            size = tileSize - 4;
-          for (let [start, end] of branches) {
-            let sx =
-              global.screenWidth / 2 +
-              (start.x - full.width * global.scrollX) * tileSize +
-              1 +
-              0.5 * size,
-              sy =
-              global.screenHeight / 2 +
-              (start.y - full.height / 2) * tileSize +
-              1 +
-              0.5 * size,
-              ex =
-              global.screenWidth / 2 +
-              (end.x - full.width * global.scrollX) * tileSize +
-              1 +
-              0.5 * size,
-              ey =
-              global.screenHeight / 2 +
-              (end.y - full.height / 2) * tileSize +
-              1 +
-              0.5 * size;
-            ctx.strokeStyle = color.black;
-            ctx.lineWidth = 2;
-            drawGuiLine(sx, sy, ex, ey);
-          }
-          ctx.globalAlpha = 0.5;
-          ctx.fillStyle = color.guiwhite;
-          ctx.fillRect(0, 0, innerWidth, innerHeight);
-          let text = "Use the arrow keys to navigate the class tree. Press T again to close it.";
-          ctx.font = "20px Ubuntu";
-          let w = ctx.measureText(text).width;
-          ctx.globalAlpha = 1;
-          ctx.lineWidth = 1;
-          ctx.fillStyle = color.red;
-          ctx.strokeStyle = color.black;
-          ctx.fillText(text, (innerWidth / 2) - (w / 2), innerHeight * 0.04);
-          ctx.strokeText(text, (innerWidth / 2) - (w / 2), innerHeight * 0.04);
-          ctx.globalAlpha = 1;
-          for (let {
+      do {
+        if (!global.showTree) break;
+        if (global.died) {
+          global.showTree = false;
+          global.scrollX = 0;
+        }
+        //socket.talk('[')
+        let basic = mockups.find(r => r.name === "Basic");
+        if (!basic) {
+          console.log("No basic");
+          break;
+        }
+        let tiles = [],
+          branches = [],
+          measureSize = (x, y, colorIndex, {
+            index,
+            tier = 0
+          }) => {
+            tiles.push({
               x,
               y,
               colorIndex,
               index
-            } of tiles) {
-            let ax =
-              global.screenWidth / 2 +
-              (x - full.width * global.scrollX) * tileSize,
-              ay = global.screenHeight / 2 + (y - full.height / 2) * tileSize,
-              size = tileSize;
-            if (ax < -50 || ax + size - 50 > global.screenWidth) continue;
-            ctx.globalAlpha = 0.75;
-            ctx.fillStyle = getColor(10);
-            drawGuiRect(ax, ay, size, size);
-            ctx.globalAlpha = 0.15;
-            ctx.fillStyle = getColor(0);
-            drawGuiRect(ax, ay, size, size * 0.6);
-            ctx.fillStyle = color.black;
-            drawGuiRect(ax, ay + size * 0.6, size, size * 0.4);
-            ctx.globalAlpha = 1;
-            let angle = -Math.PI / 4,
-              picture = getEntityImageFromMockup(index, 10),
-              position = mockups[index].position,
-              scale = (0.8 * size) / position.axis,
-              xx =
-              ax + 0.5 * size - scale * position.middle.x * Math.cos(angle),
-              yy =
-              ay + 0.5 * size - scale * position.middle.x * Math.sin(angle);
-            drawEntity(
-              xx,
-              yy,
-              picture,
-              0.5,
-              1,
-              (scale / picture.size) * 2,
-              angle,
-              true
-            );
-            ctx.strokeStyle = color.black;
-            ctx.globalAlpha = 1;
-            ctx.lineWidth = 2;
-            drawGuiRect(ax, ay, size, size, true);
-          }
-        } while (false);
-      }
+            });
+            let {
+              upgrades
+            } = mockups[index];
+            switch (tier) {
+              case 3:
+                return {
+                  width: 1,
+                    height: 1
+                };
+              case 2:
+                upgrades.forEach((u, i) => measureSize(x, y + 2 + i, i, u));
+                branches.push([{
+                  x,
+                  y
+                }, {
+                  x,
+                  y: y + 1 + upgrades.length
+                }]);
+                return {
+                  width: 1,
+                    height: 2 + upgrades.length
+                };
+                //case 2:
+              case 1:
+              case 0: {
+                let xStart = x,
+                  us = upgrades.map((u, i) => {
+                    let spacing = 2 * (u.tier - tier),
+                      measure = measureSize(x, y + spacing, i, u);
+                    branches.push([{
+                        x,
+                        y: y + (i === 0 ? 0 : 1)
+                      },
+                      {
+                        x,
+                        y: y + spacing
+                      }
+                    ]);
+                    if (i + 1 === upgrades.length)
+                      branches.push([{
+                          x: xStart,
+                          y: y + 1
+                        },
+                        {
+                          x,
+                          y: y + 1
+                        }
+                      ]);
+                    x += measure.width;
+                    return measure;
+                  });
+                return {
+                  width: us.map(r => r.width).reduce((a, b) => a + b, 0),
+                  height: 2 + Math.max(...us.map(r => r.height))
+                };
+              }
+            }
+          },
+          full = measureSize(0, 0, 0, {
+            index: basic.index
+          }),
+          tileDiv = true ? 1 : 1.25,
+          tileSize =
+          Math.min(
+            ((global.screenWidth * 0.9) / full.width) * 55,
+            (global.screenHeight * 0.9) / full.height
+          ) / tileDiv,
+          size = tileSize - 4;
+        for (let [start, end] of branches) {
+          let sx =
+            global.screenWidth / 2 +
+            (start.x - full.width * global.scrollX) * tileSize +
+            1 +
+            0.5 * size,
+            sy =
+            global.screenHeight / 2 +
+            (start.y - full.height / 2) * tileSize +
+            1 +
+            0.5 * size,
+            ex =
+            global.screenWidth / 2 +
+            (end.x - full.width * global.scrollX) * tileSize +
+            1 +
+            0.5 * size,
+            ey =
+            global.screenHeight / 2 +
+            (end.y - full.height / 2) * tileSize +
+            1 +
+            0.5 * size;
+          ctx.strokeStyle = color.black;
+          ctx.lineWidth = 2;
+          drawGuiLine(sx, sy, ex, ey);
+        }
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = color.guiwhite;
+        ctx.fillRect(0, 0, innerWidth, innerHeight);
+        let text = "Use the arrow keys to navigate the class tree. Press T again to close it.";
+        ctx.font = "20px Ubuntu";
+        let w = ctx.measureText(text).width;
+        ctx.globalAlpha = 1;
+        ctx.lineWidth = 1;
+        ctx.fillStyle = color.red;
+        ctx.strokeStyle = color.black;
+        ctx.fillText(text, (innerWidth / 2) - (w / 2), innerHeight * 0.04);
+        ctx.strokeText(text, (innerWidth / 2) - (w / 2), innerHeight * 0.04);
+        ctx.globalAlpha = 1;
+        for (let {
+            x,
+            y,
+            colorIndex,
+            index
+          } of tiles) {
+          let ax =
+            global.screenWidth / 2 +
+            (x - full.width * global.scrollX) * tileSize,
+            ay = global.screenHeight / 2 + (y - full.height / 2) * tileSize,
+            size = tileSize;
+          if (ax < -50 || ax + size - 50 > global.screenWidth) continue;
+          ctx.globalAlpha = 0.75;
+          ctx.fillStyle = getColor(10);
+          drawGuiRect(ax, ay, size, size);
+          ctx.globalAlpha = 0.15;
+          ctx.fillStyle = getColor(0);
+          drawGuiRect(ax, ay, size, size * 0.6);
+          ctx.fillStyle = color.black;
+          drawGuiRect(ax, ay + size * 0.6, size, size * 0.4);
+          ctx.globalAlpha = 1;
+          let angle = -Math.PI / 4,
+            picture = getEntityImageFromMockup(index, 10),
+            position = mockups[index].position,
+            scale = (0.8 * size) / position.axis,
+            xx =
+            ax + 0.5 * size - scale * position.middle.x * Math.cos(angle),
+            yy =
+            ay + 0.5 * size - scale * position.middle.x * Math.sin(angle);
+          drawEntity(
+            xx,
+            yy,
+            picture,
+            0.5,
+            1,
+            (scale / picture.size) * 2,
+            angle,
+            true
+          );
+          ctx.strokeStyle = color.black;
+          ctx.globalAlpha = 1;
+          ctx.lineWidth = 2;
+          drawGuiRect(ax, ay, size, size, true);
+        }
+      } while (false);
+    }
 
     { // Draw messages
       if (global.showTree) return;
@@ -3653,12 +3658,11 @@ if (snowAmount) {
       if (a > 0) {
         ctx.globalAlpha = a;
         let s = p.type
-          ctx.beginPath();
-          ctx.arc(p.x + (-2) * p.vel * Math.cos(p.dir), p.y + (-2) * p.vel * Math.sin(p.dir), p.r, 0, 2 * Math.PI);
-          ctx.fillStyle = "#ffffff";
-          ctx.lineWidth = p.r / 5;
-          ctx.stroke();
-          ctx.fill();
+        ctx.beginPath();
+        ctx.arc(p.x + (-2) * p.vel * Math.cos(p.dir), p.y + (-2) * p.vel * Math.sin(p.dir), p.r, 0, 2 * Math.PI);
+        ctx.fillStyle = "#ffffff";
+        ctx.lineWidth = p.r / 5;
+        ctx.fill();
       } else if (
         p.x < 20 ||
         p.x > window.innerWidth + 20 ||
@@ -3667,7 +3671,6 @@ if (snowAmount) {
         global.gameStart
       ) {
         p.gone = true;
-        //snow.splice(snow.indexOf(p), 1);
       }
     }
     if (snowAmount > Math.random()) {
@@ -3688,7 +3691,14 @@ if (snowAmount) {
               (30 * Math.sin((0.3 * counter * Math.PI) / 180) * Math.PI) / 180;
             let vel = 5 + 7 * Math.random();
             let color = "#0fa";
-            snow.push({ x, y: aeef, r, dir, vel, color });
+            snow.push({
+              x,
+              y: aeef,
+              r,
+              dir,
+              vel,
+              color
+            });
           }
         }
       }
